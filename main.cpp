@@ -69,15 +69,81 @@ bool isValidSoP(const string& sop)
 
 bool isValidPoS(const string& pos)
 {
-    
+    int openBrackets = 0;
+    bool prevWasVariable = false;
+
+    for (char c : pos)
+    {
+        if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
+        {
+            if (prevWasVariable)
+            {
+                cout << "Invalid PoS expression." << endl;
+                return false;
+            }
+            prevWasVariable = true;
+        }
+        else if (c == '+')
+        {
+            if (!prevWasVariable)
+            {
+                cout << "Invalid PoS expression." << endl;
+                return false;
+            }
+            prevWasVariable = false;
+        }
+        else if (c == '(')
+        {
+            if (prevWasVariable)
+            {
+                cout << "Invalid PoS expression." << endl;
+                return false;
+            }
+            openBrackets++;
+            prevWasVariable = false;
+        }
+        else if (c == ')')
+        {
+            if (!prevWasVariable)
+            {
+                cout << "Invalid PoS expression." << endl;
+                return false;
+            }
+            openBrackets--;
+            prevWasVariable = false;
+        }
+        else if (c == '\'')
+        {
+            if (!prevWasVariable)
+            {
+                cout << "Invalid PoS expression." << endl;
+                return false;
+            }
+            prevWasVariable = true;
+        }
+        else if (c != ' ')
+        {
+            cout << "Invalid character in PoS expression: " << c << endl;
+            return false;
+        }
+    }
+
+    if (openBrackets != 0)
+    {
+        cout << "Invalid SoP expression." << endl;
+        return false;
+    }
+
+    return true;
 }
 
 int main()
 {
-    bool flag = false;
+    bool flag;
     string function;
     do
     {
+        flag = false;
         cout << "Enter a Boolean function in SoP or PoS form: ";
         getline(cin, function);
 
@@ -98,4 +164,3 @@ int main()
 
     return 0;
 }
-
