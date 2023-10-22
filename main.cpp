@@ -20,7 +20,6 @@ bool isValidSoP(const string& sop)
         {
             if (!prevWasVariable)
             {
-                cout << "Invalid SoP expression." << endl;
                 return false;
             }
             prevWasVariable = true;
@@ -29,7 +28,6 @@ bool isValidSoP(const string& sop)
         {
             if (!prevWasVariable)
             {
-                cout << "Invalid SoP expression." << endl;
                 return false;
             }
             prevWasVariable = false;
@@ -39,7 +37,6 @@ bool isValidSoP(const string& sop)
             openBrackets++;
             if (prevWasVariable)
             {
-                cout << "Invalid SoP expression." << endl;
                 return false;
             }
             prevWasVariable = false;
@@ -48,7 +45,6 @@ bool isValidSoP(const string& sop)
         {
             if (openBrackets <= 0)
             {
-                cout << "Invalid SoP expression." << endl;
                 return false;
             }
             openBrackets--;
@@ -63,7 +59,6 @@ bool isValidSoP(const string& sop)
 
     if (openBrackets != 0)
     {
-        cout << "Invalid SoP expression." << endl;
         return false;
     }
 
@@ -73,7 +68,7 @@ bool isValidSoP(const string& sop)
 bool isValidPoS(const string& pos)
 {
     int openBrackets = 0;
-    bool prevWasVariable;
+    bool prevWasVariable = false;
 
     for (char c : pos)
     {
@@ -81,7 +76,6 @@ bool isValidPoS(const string& pos)
         {
             if (prevWasVariable)
             {
-                cout << "Invalid PoS expression." << endl;
                 return false;
             }
             prevWasVariable = true;
@@ -90,7 +84,6 @@ bool isValidPoS(const string& pos)
         {
             if (!prevWasVariable)
             {
-                cout << "Invalid PoS expression." << endl;
                 return false;
             }
             prevWasVariable = false;
@@ -99,7 +92,6 @@ bool isValidPoS(const string& pos)
         {
             if (prevWasVariable)
             {
-                cout << "Invalid PoS expression." << endl;
                 return false;
             }
             openBrackets++;
@@ -109,7 +101,6 @@ bool isValidPoS(const string& pos)
         {
             if (!prevWasVariable)
             {
-                cout << "Invalid PoS expression." << endl;
                 return false;
             }
             openBrackets--;
@@ -119,7 +110,6 @@ bool isValidPoS(const string& pos)
         {
             if (!prevWasVariable)
             {
-                cout << "Invalid PoS expression." << endl;
                 return false;
             }
             prevWasVariable = true;
@@ -133,7 +123,6 @@ bool isValidPoS(const string& pos)
 
     if (openBrackets != 0)
     {
-        cout << "Invalid SoP expression." << endl;
         return false;
     }
 
@@ -209,9 +198,30 @@ void generateTruthTable(const string& function)
         }
         else
         {
+            result = true;
+            temp2 = false;
             for (int i = 0; i < function.size(); i++)
             {
-                
+                char c = function[i];
+                char next_c = function[i+1];
+                if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
+                {
+                    if (next_c == '\'')
+                    {
+                        temp1 = !((row >> (numVariables - 1 - (find(Variables.begin(), Variables.end(), c) - Variables.begin()))) & 1);
+                        i++;
+                    }
+                    else
+                    {
+                        temp1 = ((row >> (numVariables - 1 - (find(Variables.begin(), Variables.end(), c) - Variables.begin()))) & 1);
+                    }
+                    temp2 |= temp1;
+                }
+                if (c == ')')
+                {
+                    result &= temp2;
+                    temp2 = false;
+                }
             }
         }
         
