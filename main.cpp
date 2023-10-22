@@ -73,7 +73,7 @@ bool isValidSoP(const string& sop)
 bool isValidPoS(const string& pos)
 {
     int openBrackets = 0;
-    bool prevWasVariable = false;
+    bool prevWasVariable;
 
     for (char c : pos)
     {
@@ -143,6 +143,7 @@ bool isValidPoS(const string& pos)
 void generateTruthTable(const string& function)
 {
 	vector <char> Variables;
+    bool result, temp1, temp2;
     cout << "Truth Table:" << endl;
     
     int numVariables = 0;
@@ -177,7 +178,44 @@ void generateTruthTable(const string& function)
 		{
             cout << ((row >> var) & 1) << " | ";
         }
-        cout << "an" << endl;
+        
+        if (isValidSoP(function))
+        {
+            result = false;
+            temp2 = true;
+            for (int i = 0; i < function.size(); i++)
+            {
+                char c = function[i];
+                char next_c = function[i+1];
+                if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
+                {
+                    if (next_c == '\'')
+                    {
+                        temp1 = !((row >> (numVariables - 1 - (find(Variables.begin(), Variables.end(), c) - Variables.begin()))) & 1);
+                        i++;
+                    }
+                    else
+                    {
+                        temp1 = ((row >> (numVariables - 1 - (find(Variables.begin(), Variables.end(), c) - Variables.begin()))) & 1);
+                    }
+                    temp2 &= temp1;
+                }
+                if ((c == '+') || (i+1 >= function.size()))
+                {
+                    result |= temp2;
+                    temp2 = true;
+                }
+            }
+        }
+        else
+        {
+            for (int i = 0; i < function.size(); i++)
+            {
+                
+            }
+        }
+        
+        cout << result << endl;
     }
 }
 
