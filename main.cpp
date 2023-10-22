@@ -1,5 +1,8 @@
 #include <iostream>
 #include <string>
+#include <vector>
+#include <algorithm>
+#include <cmath>
 using namespace std;
 
 bool isValidSoP(const string& sop)
@@ -137,6 +140,47 @@ bool isValidPoS(const string& pos)
     return true;
 }
 
+void generateTruthTable(const string& function)
+{
+	vector <char> Variables;
+    cout << "Truth Table:" << endl;
+    
+    int numVariables = 0;
+    for (char c : function)
+	{
+        if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
+		{
+			Variables.push_back(c);
+        }
+    }
+    
+    sort(Variables.begin(), Variables.end());
+	Variables.erase(unique(Variables.begin(), Variables.end()), Variables.end());
+    numVariables = Variables.size();
+
+    for (int i = 0; i < numVariables; i++)
+	{
+        cout << Variables[i] << " | ";
+    }
+    cout << "Func" << endl;
+
+    for (int i = 0; i < numVariables; i++)
+	{
+        cout << "----";
+    }
+    cout << "-----" << endl;
+
+    int numRows = pow(2, numVariables);
+    for (int row = 0; row < numRows; row++)
+	{
+        for (int var = numVariables - 1; var >= 0; var--)
+		{
+            cout << ((row >> var) & 1) << " | ";
+        }
+        cout << "an" << endl;
+    }
+}
+
 int main()
 {
     bool flag;
@@ -150,10 +194,12 @@ int main()
         if (isValidSoP(function))
         {
             cout << "Valid SoP expression." << endl;
+            generateTruthTable(function);
         }
         else if (isValidPoS(function))
         {
             cout << "Valid PoS expression." << endl;
+            generateTruthTable(function);
         }
         else
         {
