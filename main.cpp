@@ -134,6 +134,7 @@ void generateTruthTable(const string& function)
 {
 	vector <char> Variables;
     bool result, temp1, temp2;
+    vector<vector<bool>> truthTable;
     string canonical_PoS = "";
     string canonical_SoP = "";
     cout << "Truth Table:" << endl;
@@ -166,9 +167,12 @@ void generateTruthTable(const string& function)
     int numRows = pow(2, numVariables);
     for (int row = 0; row < numRows; row++)
 	{
+	    vector<bool> rowValues;
+	    
         for (int var = numVariables - 1; var >= 0; var--)
 		{
             cout << ((row >> var) & 1) << " | ";
+            rowValues.push_back(((row >> var) & 1));
         }
         
         if (isValidSoP(function))
@@ -183,12 +187,12 @@ void generateTruthTable(const string& function)
                 {
                     if (next_c == '\'')
                     {
-                        temp1 = !((row >> (numVariables - 1 - (find(Variables.begin(), Variables.end(), c) - Variables.begin()))) & 1);
+                        temp1 = !rowValues[(find(Variables.begin(), Variables.end(), c) - Variables.begin())];
                         i++;
                     }
                     else
                     {
-                        temp1 = ((row >> (numVariables - 1 - (find(Variables.begin(), Variables.end(), c) - Variables.begin()))) & 1);
+                        temp1 = rowValues[(find(Variables.begin(), Variables.end(), c) - Variables.begin())];
                     }
                     temp2 &= temp1;
                 }
@@ -211,12 +215,12 @@ void generateTruthTable(const string& function)
                 {
                     if (next_c == '\'')
                     {
-                        temp1 = !((row >> (numVariables - 1 - (find(Variables.begin(), Variables.end(), c) - Variables.begin()))) & 1);
+                        temp1 = !rowValues[(find(Variables.begin(), Variables.end(), c) - Variables.begin())];
                         i++;
                     }
                     else
                     {
-                        temp1 = ((row >> (numVariables - 1 - (find(Variables.begin(), Variables.end(), c) - Variables.begin()))) & 1);
+                        temp1 = rowValues[(find(Variables.begin(), Variables.end(), c) - Variables.begin())];
                     }
                     temp2 |= temp1;
                 }
@@ -233,7 +237,7 @@ void generateTruthTable(const string& function)
             for (int i = 0; i < numVariables; i++)
             {
                 canonical_SoP += Variables[i];
-                if (!((row >> (numVariables - 1 - i) & 1)))
+                if (!rowValues[i])
                 {
                     canonical_SoP += '\'';
                 }
@@ -246,7 +250,7 @@ void generateTruthTable(const string& function)
             for (int i = 0; i < numVariables; i++)
             {
                 canonical_PoS += Variables[i];
-                if (!((row >> (numVariables - 1 - i) & 1)))
+                if (!rowValues[i])
                 {
                     canonical_PoS += '\'';
                 }
