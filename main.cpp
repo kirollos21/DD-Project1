@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include <cmath>
+#include <string>
 using namespace std;
 
 bool isValidSoP(const string& sop)
@@ -133,6 +134,8 @@ void generateTruthTable(const string& function)
 {
 	vector <char> Variables;
     bool result, temp1, temp2;
+    string canonical_PoS = "";
+    string canonical_SoP = "";
     cout << "Truth Table:" << endl;
     
     int numVariables = 0;
@@ -225,8 +228,44 @@ void generateTruthTable(const string& function)
             }
         }
         
+        if (result)
+        {
+            for (int i = 0; i < numVariables; i++)
+            {
+                canonical_SoP += Variables[i];
+                if (!((row >> (numVariables - 1 - i) & 1)))
+                {
+                    canonical_SoP += '\'';
+                }
+            }
+            canonical_SoP += " + ";
+        }
+        else
+        {
+            canonical_PoS += "(";
+            for (int i = 0; i < numVariables; i++)
+            {
+                canonical_PoS += Variables[i];
+                if (!((row >> (numVariables - 1 - i) & 1)))
+                {
+                    canonical_PoS += '\'';
+                }
+                canonical_PoS += " + ";
+            }
+            canonical_PoS.pop_back();
+            canonical_PoS.pop_back();
+            canonical_PoS.pop_back();
+            canonical_PoS += ") ";
+        }
+        
         cout << result << endl;
     }
+    
+    canonical_SoP.pop_back();
+    canonical_SoP.pop_back();
+    canonical_SoP.pop_back();
+    
+    cout << "canonical SoP : " << canonical_SoP << endl << "canonical PoS : " << canonical_PoS << endl;
 }
 
 int main()
