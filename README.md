@@ -1,4 +1,4 @@
-# DD-Projest1
+# DD-Project1
 
 ## Students and IDs
 
