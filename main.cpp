@@ -130,11 +130,11 @@ bool isValidPoS(const string& pos)
     return true;
 }
 
-void generateTruthTable(const string& function)
+void generateTruthTable(const string& function, vector <char>& Variables, vector<vector<bool>>& minterms)
 {
-	vector <char> Variables;
     bool result, temp1, temp2;
     vector<vector<bool>> truthTable;
+    vector<bool> minterm;
     string canonical_PoS = "";
     string canonical_SoP = "";
     cout << "Truth Table:" << endl;
@@ -240,8 +240,15 @@ void generateTruthTable(const string& function)
                 if (!rowValues[i])
                 {
                     canonical_SoP += '\'';
+                    minterm.push_back(0);
+                }
+                else
+                {
+                    minterm.push_back(1);
                 }
             }
+            minterms.push_back(minterm);
+            minterm.clear();
             canonical_SoP += " + ";
         }
         else
@@ -276,6 +283,8 @@ int main()
 {
     bool flag;
     string function;
+    vector <char> Variables;
+    vector<vector<bool>> minterms;
     do
     {
         flag = false;
@@ -285,12 +294,10 @@ int main()
         if (isValidSoP(function))
         {
             cout << "Valid SoP expression." << endl;
-            generateTruthTable(function);
         }
         else if (isValidPoS(function))
         {
             cout << "Valid PoS expression." << endl;
-            generateTruthTable(function);
         }
         else
         {
@@ -298,6 +305,9 @@ int main()
             flag = true;
         }
     } while (flag);
+
+    generateTruthTable(function, Variables, minterms);
+
 
     return 0;
 }
