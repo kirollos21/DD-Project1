@@ -6,7 +6,7 @@
 #include <string>
 using namespace std;
 
-bool isValidSoP(const string& sop)
+bool isValidSoP(string& sop)
 {
     int openBrackets = 0;
     bool prevWasVariable = false;
@@ -66,7 +66,7 @@ bool isValidSoP(const string& sop)
     return true;
 }
 
-bool isValidPoS(const string& pos)
+bool isValidPoS(string& pos)
 {
     int openBrackets = 0;
     bool prevWasVariable = false;
@@ -130,7 +130,7 @@ bool isValidPoS(const string& pos)
     return true;
 }
 
-void generateTruthTable(const string& function, vector <char>& Variables, vector<vector<bool>>& minterms)
+void generateTruthTable(string& function, vector <char>& Variables, vector<vector<bool>>& minterms)
 {
     bool result, temp1, temp2;
     vector<vector<bool>> truthTable;
@@ -279,6 +279,32 @@ void generateTruthTable(const string& function, vector <char>& Variables, vector
     cout << "canonical SoP : " << canonical_SoP << endl << "canonical PoS : " << canonical_PoS << endl;
 }
 
+void generatePrimeImplicants(string& function, vector<char>& Variables, vector<vector<bool>>& minterms)
+{
+    vector<vector<vector<bool>> > groups;
+    int maxOnes = 0;
+    
+    for (vector<bool>& minterm : minterms)
+    {
+        int onesCount = count(minterm.begin(), minterm.end(), true);
+        maxOnes = max(maxOnes, onesCount);
+    }
+    groups.resize(maxOnes + 1);
+
+    for (vector<bool>& minterm : minterms)
+    {
+        int onesCount = count(minterm.begin(), minterm.end(), true);
+        groups[onesCount].push_back(minterm);
+    }
+    
+    vector<bool> mintermCovered(minterms.size(), false);
+
+    vector<vector<vector<bool>> > primeImplicants;
+
+    
+}
+
+
 int main()
 {
     bool flag;
@@ -307,6 +333,8 @@ int main()
     } while (flag);
 
     generateTruthTable(function, Variables, minterms);
+    
+    generatePrimeImplicants(function, Variables, minterms);
 
 
     return 0;
