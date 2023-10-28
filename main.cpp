@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cmath>
 #include <string>
+#include <set>
 using namespace std;
 
 bool isValidSoP(string& sop)
@@ -279,31 +280,81 @@ void generateTruthTable(string& function, vector <char>& Variables, vector<vecto
     cout << "canonical SoP : " << canonical_SoP << endl << "canonical PoS : " << canonical_PoS << endl;
 }
 
-void generatePrimeImplicants(string& function, vector<char>& Variables, vector<vector<bool>>& minterms)
+void generatePrimeImplicants(vector<char>& Variables, vector<vector<bool>>& minterms)
 {
-    vector<vector<vector<bool>> > groups;
+    vector<vector<vector<bool>>> groups;
     int maxOnes = 0;
     
-    for (vector<bool>& minterm : minterms)
+    for (const auto& minterm : minterms)
     {
         int onesCount = count(minterm.begin(), minterm.end(), true);
         maxOnes = max(maxOnes, onesCount);
     }
     groups.resize(maxOnes + 1);
 
-    for (vector<bool>& minterm : minterms)
+    for (const auto& minterm : minterms)
     {
         int onesCount = count(minterm.begin(), minterm.end(), true);
         groups[onesCount].push_back(minterm);
     }
-    
-    vector<bool> mintermCovered(minterms.size(), false);
 
-    vector<vector<vector<bool>> > primeImplicants;
+    cout << "Prime Implicants:" << endl;
 
+    set<string> seen;
     
+    for (int i = 0; i < groups.size(); ++i)
+    {
+        for (const auto& term1 : groups[i])
+        {
+            for (int j = i + 1; j < groups.size(); ++j)
+            {
+                for (const auto& term2 : groups[j])
+                {
+                    int diffBits = 0;
+                    int diffIndex = -1;
+
+                    for (int k = 0; k < term1.size(); ++k)
+                    {
+                        if (term1[k] != term2[k])
+                        {
+                            diffBits++;
+                            diffIndex = k;
+                        }
+                    }
+                    
+                    if (diffBits == 1)
+                    {
+                        string primeImplicant;
+                        for (int k = 0; k < term1.size(); ++k)
+                        {
+                            if (k != diffIndex)
+                            {
+                                if (term1[k] || term2[k])
+                                {
+                                    primeImplicant += Variables[k];
+                                }
+                            }
+                        }
+                        
+                        if (seen.find(primeImplicant) == seen.end()) {
+                            cout << "PI: " << primeImplicant << " Covers Minterms: ";
+                            for (const auto& m : {term1, term2})
+                            {
+                                for (int k = 0; k < m.size(); ++k)
+                                {
+                                    cout << m[k];
+                                }
+                                cout << '\t';
+                            }
+                            cout << endl;
+                            seen.insert(primeImplicant);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
-
 
 int main()
 {
@@ -334,7 +385,7 @@ int main()
 
     generateTruthTable(function, Variables, minterms);
     
-    generatePrimeImplicants(function, Variables, minterms);
+    generatePrimeImplicants(Variables, minterms);
 
 
     return 0;
