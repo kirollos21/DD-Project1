@@ -5,6 +5,7 @@
 #include <cmath>
 #include <string>
 #include <set>
+#include <map>
 using namespace std;
 
 bool isValidSoP(string& sop)
@@ -433,6 +434,55 @@ void solvePITable(vector<string>& EPIs, vector<string>& PIs, vector<vector<bool>
     cout << endl;
 }
 
+//q7
+void generateKMap(vector<vector<bool>>& minterms, int numVariables) {
+    if (numVariables > 4 || numVariables < 2) {
+        cout << "K-Map generation only supports 2 to 4 variables." << endl;
+        return;
+    }
+
+    int rows = pow(2, ceil(numVariables / 2.0));
+    int cols = pow(2, floor(numVariables / 2.0));
+
+    vector<vector<int>> kmap(rows, vector<int>(cols, -1)); // Initialize K-Map with -1 (undefined)
+
+    // Mapping for Gray code
+    map<vector<bool>, pair<int, int>> grayCodeMapping;
+
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            vector<bool> grayCodeRow = {static_cast<bool>(i & 1), static_cast<bool>((i >> 1) & 1)};
+            vector<bool> grayCodeCol = {static_cast<bool>(j & 1), static_cast<bool>((j >> 1) & 1)};
+
+            vector<bool> grayCode;
+            grayCode.insert(grayCode.end(), grayCodeRow.begin(), grayCodeRow.end());
+            grayCode.insert(grayCode.end(), grayCodeCol.begin(), grayCodeCol.end());
+
+            grayCodeMapping[grayCode] = {i, j};
+        }
+    }
+
+    for (const auto& minterm : minterms) {
+        auto it = grayCodeMapping.find(minterm);
+        if (it != grayCodeMapping.end()) {
+            kmap[it->second.first][it->second.second] = 1;
+        }
+    }
+
+    // Print K-Map
+    for (const auto& row : kmap) {
+        for (const auto& cell : row) {
+            if (cell == -1) {
+                cout << "0 ";
+            } else {
+                cout << cell << " ";
+            }
+        }
+        cout << endl;
+    }
+}
+
+
 int main()
 {
     bool flag;
@@ -481,12 +531,15 @@ int main()
 
 
 
-    // Dummy data for testing (You should replace these data from q3 and q4)
-    vector<string> EPIs = {"AB", "AC"};  // Replace with your actual EPIs
-    vector<string> PIs = {"AB", "AC", "BC"};  // Replace with your actual PIs
-    minterms = {{1, 0, 1}, {1, 1, 0}};  // Replace with your actual minterms
-    // Call the function to solve the PI table and print the minimized Boolean expression
-    solvePITable(EPIs, PIs, minterms);
+//    // Dummy data for testing (You should replace these data from q3 and q4)
+//    vector<string> EPIs = {"AB", "AC"};  // Replace with your actual EPIs
+//    vector<string> PIs = {"AB", "AC", "BC"};  // Replace with your actual PIs
+//    minterms = {{1, 0, 1}, {1, 1, 0}};  // Replace with your actual minterms
+//    // Call the function to solve the PI table and print the minimized Boolean expression
+//    solvePITable(EPIs, PIs, minterms);
+    int numVariables = 4;
+
+    generateKMap(minterms, numVariables);
 
     return 0;
 }
