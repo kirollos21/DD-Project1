@@ -486,7 +486,6 @@ bool coversMinterm(const string& pi, const vector<bool>& minterm) {
     return true;
 }
 
-
 bool isCoveredByEPIs(const vector<bool>& minterm, const vector<string>& EPIs) {
     // Loop through each EPI and check if it covers the minterm
     for (const auto& epi : EPIs) {
@@ -512,7 +511,6 @@ string findMinimumPI(const vector<bool>& minterm, const vector<string>& PIs) {
     }
     return minPI;
 }
-
 
 void solvePITable(vector<string>& EPIs, vector<string>& PIs, vector<vector<bool>>& minterms) {
     set<string> minimizedExpression;
@@ -645,7 +643,6 @@ bool coversMinterm(const string& pi, const vector<bool>& minterm) {
     return true;
 }
 
-
 bool isCoveredByEPIs(const vector<bool>& minterm, const vector<string>& EPIs) {
     // Loop through each EPI and check if it covers the minterm
     for (const auto& epi : EPIs) {
@@ -671,7 +668,6 @@ string findMinimumPI(const vector<bool>& minterm, const vector<string>& PIs) {
     }
     return minPI;
 }
-
 
 void solvePITable(vector<string>& EPIs, vector<string>& PIs, vector<vector<bool>>& minterms) {
     set<string> minimizedExpression;
