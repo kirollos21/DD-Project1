@@ -435,6 +435,12 @@ void solvePITable(vector<string>& EPIs, vector<string>& PIs, vector<vector<bool>
 }
 
 //q7
+void printGrayCode(int n, int len) {
+    for (int i = len - 1; i >= 0; --i) {
+        cout << ((n >> i) & 1);
+    }
+}
+
 void generateKMap(vector<vector<bool>>& minterms, int numVariables) {
     if (numVariables > 4 || numVariables < 2) {
         cout << "K-Map generation only supports 2 to 4 variables." << endl;
@@ -446,37 +452,58 @@ void generateKMap(vector<vector<bool>>& minterms, int numVariables) {
 
     vector<vector<int>> kmap(rows, vector<int>(cols, -1)); // Initialize K-Map with -1 (undefined)
 
-    // Mapping for Gray code
-    map<vector<bool>, pair<int, int>> grayCodeMapping;
+    // Fill in the K-Map based on minterms
+    for (const auto& minterm : minterms) {
+        int row = 0, col = 0;
+        for (int i = 0; i < ceil(numVariables / 2.0); ++i) {
+            row = (row << 1) | minterm[i];
+        }
+        for (int i = ceil(numVariables / 2.0); i < numVariables; ++i) {
+            col = (col << 1) | minterm[i];
+        }
+        kmap[row][col] = 1;
+    }
+
+    // Print column labels
+    cout << "  ";
+    for (int j = 0; j < cols; ++j) {
+        printGrayCode(j, floor(numVariables / 2.0));
+        cout << " ";
+    }
+    cout << endl;
+
+    // Print horizontal line
+    cout << " +";
+    for (int j = 0; j < cols; ++j) {
+        for (int k = 0; k < floor(numVariables / 2.0); ++k) {
+            cout << "-";
+        }
+        cout << "+";
+    }
+    cout << endl;
 
     for (int i = 0; i < rows; ++i) {
+        // Print row labels
+        printGrayCode(i, ceil(numVariables / 2.0));
+        cout << "|";
+
         for (int j = 0; j < cols; ++j) {
-            vector<bool> grayCodeRow = {static_cast<bool>(i & 1), static_cast<bool>((i >> 1) & 1)};
-            vector<bool> grayCodeCol = {static_cast<bool>(j & 1), static_cast<bool>((j >> 1) & 1)};
-
-            vector<bool> grayCode;
-            grayCode.insert(grayCode.end(), grayCodeRow.begin(), grayCodeRow.end());
-            grayCode.insert(grayCode.end(), grayCodeCol.begin(), grayCodeCol.end());
-
-            grayCodeMapping[grayCode] = {i, j};
-        }
-    }
-
-    for (const auto& minterm : minterms) {
-        auto it = grayCodeMapping.find(minterm);
-        if (it != grayCodeMapping.end()) {
-            kmap[it->second.first][it->second.second] = 1;
-        }
-    }
-
-    // Print K-Map
-    for (const auto& row : kmap) {
-        for (const auto& cell : row) {
-            if (cell == -1) {
-                cout << "0 ";
+            if (kmap[i][j] == -1) {
+                cout << "0";
             } else {
-                cout << cell << " ";
+                cout << kmap[i][j];
             }
+            cout << "|";
+        }
+        cout << endl;
+
+        // Print horizontal line
+        cout << " +";
+        for (int j = 0; j < cols; ++j) {
+            for (int k = 0; k < floor(numVariables / 2.0); ++k) {
+                cout << "-";
+            }
+            cout << "+";
         }
         cout << endl;
     }
