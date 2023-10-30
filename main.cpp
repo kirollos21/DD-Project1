@@ -328,7 +328,7 @@ void generateTruthTable(string& function, vector <char>& Variables, vector<vecto
     cout << "canonical SoP : " << canonical_SoP << endl << "canonical PoS : " << canonical_PoS << endl;
 }
 
-void generatePrimeImplicants(vector<char>& Variables, vector<vector<bool>>& minterms)
+void generatePrimeImplicants(vector<char>& Variables, vector<vector<bool>>& minterms, set<implicationRow>& primes)
 {
     /*
     vector<vector<vector<bool>>> groups;
@@ -462,8 +462,7 @@ void generatePrimeImplicants(vector<char>& Variables, vector<vector<bool>>& mint
         tester = *it;
         tester.printRow();
     }
-
-
+    primes = primeImplicants;
 }
 
 int main()
@@ -495,7 +494,8 @@ int main()
 
     generateTruthTable(function, Variables, minterms);
     
-    generatePrimeImplicants(Variables, minterms);
+    set<implicationRow> primeImplicants, essentialPrimeImplicants;
+    generatePrimeImplicants(Variables, minterms, primeImplicants);
 
 
     return 0;
