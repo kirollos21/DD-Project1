@@ -6,6 +6,7 @@
 #include <string>
 #include <set>
 #include <map>
+#include <bitset>
 using namespace std;
 
 bool isValidSoP(string& sop)
@@ -435,10 +436,14 @@ void solvePITable(vector<string>& EPIs, vector<string>& PIs, vector<vector<bool>
 }
 
 //q7
-void printGrayCode(int n, int len) {
-    for (int i = len - 1; i >= 0; --i) {
-        cout << ((n >> i) & 1);
+// Function to generate Gray code sequence.
+vector<int> grayCode(int n) {
+    vector<int> res;
+    for (int i = 0; i < (1 << n); i++) {
+        int val = i ^ (i >> 1);
+        res.push_back(val);
     }
+    return res;
 }
 
 void generateKMap(vector<vector<bool>>& minterms, int numVariables) {
@@ -452,6 +457,10 @@ void generateKMap(vector<vector<bool>>& minterms, int numVariables) {
 
     vector<vector<int>> kmap(rows, vector<int>(cols, -1)); // Initialize K-Map with -1 (undefined)
 
+    // Generate Gray code for rows and columns
+    vector<int> rowGray = grayCode(ceil(numVariables / 2.0));
+    vector<int> colGray = grayCode(floor(numVariables / 2.0));
+
     // Fill in the K-Map based on minterms
     for (const auto& minterm : minterms) {
         int row = 0, col = 0;
@@ -461,54 +470,52 @@ void generateKMap(vector<vector<bool>>& minterms, int numVariables) {
         for (int i = ceil(numVariables / 2.0); i < numVariables; ++i) {
             col = (col << 1) | minterm[i];
         }
-        kmap[row][col] = 1;
+        int rowIndex = find(rowGray.begin(), rowGray.end(), row) - rowGray.begin();
+        int colIndex = find(colGray.begin(), colGray.end(), col) - colGray.begin();
+        kmap[rowIndex][colIndex] = 1;
     }
+
+    int rowBits = ceil(numVariables / 2.0);
+    int colBits = floor(numVariables / 2.0);
 
     // Print column labels
     cout << "  ";
-    for (int j = 0; j < cols; ++j) {
-        printGrayCode(j, floor(numVariables / 2.0));
-        cout << " ";
+    for (int j : colGray) {
+        cout << bitset<sizeof(int) * 8>(j).to_string().substr(sizeof(int) * 8 - colBits) << " ";
     }
     cout << endl;
 
     // Print horizontal line
     cout << " +";
     for (int j = 0; j < cols; ++j) {
-        for (int k = 0; k < floor(numVariables / 2.0); ++k) {
-            cout << "-";
-        }
-        cout << "+";
+        cout << string(colBits, '-') << "-+";
     }
     cout << endl;
 
-    for (int i = 0; i < rows; ++i) {
+    for (int i : rowGray) {
         // Print row labels
-        printGrayCode(i, ceil(numVariables / 2.0));
-        cout << "|";
+        cout << bitset<sizeof(int) * 8>(i).to_string().substr(sizeof(int) * 8 - rowBits) << "|";
 
-        for (int j = 0; j < cols; ++j) {
-            if (kmap[i][j] == -1) {
-                cout << "0";
+
+        int rowIndex = find(rowGray.begin(), rowGray.end(), i) - rowGray.begin();
+        for (int j : colGray) {
+            int colIndex = find(colGray.begin(), colGray.end(), j) - colGray.begin();
+            if (kmap[rowIndex][colIndex] == -1) {
+                cout << "0 ";
             } else {
-                cout << kmap[i][j];
+                cout << kmap[rowIndex][colIndex] << " ";
             }
-            cout << "|";
         }
-        cout << endl;
+        cout << "|" << endl;
 
         // Print horizontal line
         cout << " +";
         for (int j = 0; j < cols; ++j) {
-            for (int k = 0; k < floor(numVariables / 2.0); ++k) {
-                cout << "-";
-            }
-            cout << "+";
+            cout << "--+";
         }
         cout << endl;
     }
 }
-
 
 int main()
 {
