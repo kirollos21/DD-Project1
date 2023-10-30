@@ -356,6 +356,83 @@ void generatePrimeImplicants(vector<char>& Variables, vector<vector<bool>>& mint
     }
 }
 
+bool coversMinterm(const string& pi, const vector<bool>& minterm) {
+    // Assuming that the variables are in the same order as in the minterm vector
+    // e.g., if minterm is {true, false} for "AB", then pi should be "AB" or "A'B" etc.
+    for (int i = 0; i < pi.size(); ++i) {
+        char var = pi[i];
+        bool isComplement = (i + 1 < pi.size() && pi[i + 1] == '\'');
+
+        // Check if the variable or its complement is present in the minterm
+        if ((isComplement && minterm[i]) || (!isComplement && !minterm[i])) {
+            return false;
+        }
+
+        // Skip the complement symbol
+        if (isComplement) {
+            ++i;
+        }
+    }
+    return true;
+}
+
+
+bool isCoveredByEPIs(const vector<bool>& minterm, const vector<string>& EPIs) {
+    // Loop through each EPI and check if it covers the minterm
+    for (const auto& epi : EPIs) {
+        if (coversMinterm(epi, minterm)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+string findMinimumPI(const vector<bool>& minterm, const vector<string>& PIs) {
+    string minPI;
+    int minSize = INT_MAX;
+
+    // Loop through each PI and check if it covers the minterm
+    for (const auto& pi : PIs) {
+        if (coversMinterm(pi, minterm)) {
+            if (pi.size() < minSize) {
+                minSize = pi.size();
+                minPI = pi;
+            }
+        }
+    }
+    return minPI;
+}
+
+
+void solvePITable(vector<string>& EPIs, vector<string>& PIs, vector<vector<bool>>& minterms) {
+    set<string> minimizedExpression;
+
+    // Add all EPIs to the minimized expression
+    for (const auto& epi : EPIs) {
+        minimizedExpression.insert(epi);
+    }
+
+    // Cover remaining minterms
+    for (const auto& minterm : minterms) {
+        if (!isCoveredByEPIs(minterm, EPIs)) {
+            string minPI = findMinimumPI(minterm, PIs);
+            minimizedExpression.insert(minPI);
+        }
+    }
+
+    // Print the minimized expression
+    cout << "Minimized Boolean Expression: ";
+    auto it = minimizedExpression.begin();
+    if (it != minimizedExpression.end()) {
+        cout << *it;
+        ++it;
+    }
+    for (; it != minimizedExpression.end(); ++it) {
+        cout << " + " << *it;
+    }
+    cout << endl;
+}
+
 int main()
 {
     bool flag;
@@ -387,6 +464,29 @@ int main()
     
     generatePrimeImplicants(Variables, minterms);
 
+    //q3
+
+
+
+    //q4
+
+
+
+
+    //q5
+
+
+
+
+
+
+
+    // Dummy data for testing (You should replace these data from q3 and q4)
+    vector<string> EPIs = {"AB", "AC"};  // Replace with your actual EPIs
+    vector<string> PIs = {"AB", "AC", "BC"};  // Replace with your actual PIs
+    minterms = {{1, 0, 1}, {1, 1, 0}};  // Replace with your actual minterms
+    // Call the function to solve the PI table and print the minimized Boolean expression
+    solvePITable(EPIs, PIs, minterms);
 
     return 0;
 }
