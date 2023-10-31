@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <bitset>
 #include <sstream>
+#include <limits.h>
 #include <fstream>
 #include <map>
 using namespace std;
@@ -346,7 +347,7 @@ void generateTruthTable(string& function, vector <char>& Variables, vector<vecto
 
 void generatePrimeImplicants(vector<char>& Variables, vector<vector<bool>>& minterms, set<implicationRow>& primes)
 {
-    /*
+
     vector<vector<vector<bool>>> groups;
     int maxOnes = 0;
     
@@ -419,7 +420,7 @@ void generatePrimeImplicants(vector<char>& Variables, vector<vector<bool>>& mint
             }
         }
     }
-    */
+
     // Use Implication Table and pick minterms with logical distances of 1 (with relatively naive algorithm) to combine
     // 2 maps to continuously push the simplified iteration, and then we scan at the end and add the finals to the PI table
     
@@ -791,8 +792,6 @@ void generateWebFiles(const vector<vector<bool>>& minterms, int numVariables, co
     cout << "HTML file has been generated." << endl;
 }
 
-
-
 string convertToWaveDrom(const string& minimizedFunction) {
     stringstream waveDromScript;
     waveDromScript << "[\"|\", ";
@@ -908,9 +907,8 @@ int main()
 
 
    // Dummy data for testing (You should replace these data from q3 and q4)
-   vector<string> EPIs = {"AB", "AC"};  // Replace with your actual EPIs
+   vector<string> EPIs = {"AB", "AC","BC"};  // Replace with your actual EPIs
    vector<string> PIs = {"AB", "AC", "BC"};  // Replace with your actual PIs
-   minterms = {{1, 0, 1}, {1, 1, 0}};  // Replace with your actual minterms
    // Call the function to solve the PI table and print the minimized Boolean expression
     int numVariables = Variables.size();
 
