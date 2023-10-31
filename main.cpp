@@ -8,12 +8,13 @@
 #include <stdlib.h>
 #include <map>
 #include <bitset>
+#include <format>
+
 using namespace std;
 struct implicationRow {
 
         set<int> coveredMinterms;
         vector<char> mintermBits;
-        bool isFinal;
 
         void printRow() {
             if (coveredMinterms.empty()) return;
@@ -22,23 +23,39 @@ struct implicationRow {
             for (auto it = mintermBits.begin(); it != mintermBits.end(); it++) cout << *it;
             cout << endl;
         }
+        
         implicationRow combine(const implicationRow& other, const int& difBit) {
             implicationRow temp = implicationRow();
             temp.coveredMinterms = this->coveredMinterms;
-            for (int i = 0; i < difBit; i++) temp.mintermBits.push_back(this->mintermBits.at(mintermBits.size() - i - 1));
+            for (int i = 0; i < difBit; i++) temp.mintermBits.push_back(this->mintermBits.at(i));
             temp.mintermBits.push_back('-');
-            for (int i = difBit + 1; i < this->mintermBits.size(); i++)
-                temp.mintermBits.push_back(this->mintermBits.at(mintermBits.size() - i - 1));
+            for (int i = difBit + 1; i < this->mintermBits.size(); i++) temp.mintermBits.push_back(this->mintermBits.at(i));
             temp.coveredMinterms.insert(other.coveredMinterms.begin(), other.coveredMinterms.end());
+            cout << endl;
             return temp;            
+        }
+        
+        bool covers(const int& minterm) {
+            return (!coveredMinterms.empty()) && (coveredMinterms.find(minterm) != coveredMinterms.end());
+        }
+        
+        string booleanExpression(vector<char> variables) {
+            string boolExp = "";
+            for (auto it = mintermBits.begin(), var = variables.begin(); it != mintermBits.end(); it++, var++) {
+                switch (*it){
+                    case '0': boolExp += *var + "'"; break;
+                    case '1': boolExp += *var; break;
+                    default: continue;
+                }
+            }
+            return boolExp;
         }
     };
 
 inline bool operator<(implicationRow mt1, implicationRow mt2) {
-    if (mt1.coveredMinterms.empty() || mt2.coveredMinterms.empty()) return 0;
-    if (*mt1.coveredMinterms.begin() < *mt2.coveredMinterms.begin()) return 1;
-    return 0;
+    return tie(mt1.coveredMinterms, mt1.mintermBits) < tie(mt2.coveredMinterms, mt2.mintermBits);
 }
+
 
 bool logicallyAdj(vector<char> exp1, vector<char> exp2, int& differentBitIndex) {
     if (exp1.size() != exp2.size()) { differentBitIndex = -1; return 0; }
@@ -50,7 +67,7 @@ bool logicallyAdj(vector<char> exp1, vector<char> exp2, int& differentBitIndex) 
             //     differentBitIndex = -1; return 0; 
             // }
             incons++;
-            differentBitIndex = exp1.size() - tempInd - 1;
+            differentBitIndex = tempInd;
         }
     }
     return incons == 1;
@@ -414,14 +431,13 @@ void generatePrimeImplicants(vector<char>& Variables, vector<vector<bool>>& mint
     implicationRow temp;
     int mintermVal = 0, p;
     for (auto i = minterms.begin(); i != minterms.end(); i++) {
-        p = 0;
+        p = Variables.size() - 1;
         mintermVal = 0;
-        for (auto j = (*i).rbegin(); j != (*i).rend(); j++, p++) {
+        for (auto j = (*i).begin(); j != (*i).end(); j++, p--) {
             mintermVal += pow(2, p) * *j;
             temp.mintermBits.push_back( *j ? '1' : '0');
         }
         temp.coveredMinterms.insert(mintermVal);
-        temp.isFinal = 0;
         implicants1.insert(temp);
         temp = implicationRow();
     }
@@ -437,7 +453,6 @@ void generatePrimeImplicants(vector<char>& Variables, vector<vector<bool>>& mint
             while (it2 != implicants1.end()) {
                 if (logicallyAdj((*it1).mintermBits, (*it2).mintermBits, dif)) {
                     indivFinal = false;
-                    cout << "Match found\n";
                     // Have to store the iterator contents in a variable to call the struct method
                     implicationRow x = *it1; 
                     implicants2.insert(x.combine(*it2, dif));
@@ -453,6 +468,7 @@ void generatePrimeImplicants(vector<char>& Variables, vector<vector<bool>>& mint
             implicants1.clear();
             for (auto it = implicants2.begin(); it != implicants2.end(); it++) implicants1.insert(*it);
             implicants2.clear(); 
+            cout << "\n\n";
             } // Shifts the implicants one column to the left, and resumes
     }
 
@@ -466,160 +482,16 @@ void generatePrimeImplicants(vector<char>& Variables, vector<vector<bool>>& mint
     primes = primeImplicants;
 }
 
-bool coversMinterm(const string& pi, const vector<bool>& minterm) {
-    // Assuming that the variables are in the same order as in the minterm vector
-    // e.g., if minterm is {true, false} for "AB", then pi should be "AB" or "A'B" etc.
-    for (int i = 0; i < pi.size(); ++i) {
-        char var = pi[i];
-        bool isComplement = (i + 1 < pi.size() && pi[i + 1] == '\'');
+void classifyEssentials(set<implicationRow> primes, map<implicationRow, string> essentials, map<implicationRow, string> nonEssentials) {
+    implicationRow temp;
+    set<int>::iterator num;
+    set<implicationRow>::iterator ch;
 
-        // Check if the variable or its complement is present in the minterm
-        if ((isComplement && minterm[i]) || (!isComplement && !minterm[i])) {
-            return false;
+    for (auto it = primes.begin(); it != primes.end(); it++) {        
+        for (auto num = (*it).coveredMinterms.begin(); num != (*it).coveredMinterms.end(); num++) {
+            ch = primes.begin();
+            
         }
-
-        // Skip the complement symbol
-        if (isComplement) {
-            ++i;
-        }
-    }
-    return true;
-}
-
-bool isCoveredByEPIs(const vector<bool>& minterm, const vector<string>& EPIs) {
-    // Loop through each EPI and check if it covers the minterm
-    for (const auto& epi : EPIs) {
-        if (coversMinterm(epi, minterm)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-string findMinimumPI(const vector<bool>& minterm, const vector<string>& PIs) {
-    string minPI;
-    int minSize = INT_MAX;
-
-    // Loop through each PI and check if it covers the minterm
-    for (const auto& pi : PIs) {
-        if (coversMinterm(pi, minterm)) {
-            if (pi.size() < minSize) {
-                minSize = pi.size();
-                minPI = pi;
-            }
-        }
-    }
-    return minPI;
-}
-
-void solvePITable(vector<string>& EPIs, vector<string>& PIs, vector<vector<bool>>& minterms) {
-    set<string> minimizedExpression;
-
-    // Add all EPIs to the minimized expression
-    for (const auto& epi : EPIs) {
-        minimizedExpression.insert(epi);
-    }
-
-    // Cover remaining minterms
-    for (const auto& minterm : minterms) {
-        if (!isCoveredByEPIs(minterm, EPIs)) {
-            string minPI = findMinimumPI(minterm, PIs);
-            minimizedExpression.insert(minPI);
-        }
-    }
-
-    // Print the minimized expression
-    cout << "Minimized Boolean Expression: ";
-    auto it = minimizedExpression.begin();
-    if (it != minimizedExpression.end()) {
-        cout << *it;
-        ++it;
-    }
-    for (; it != minimizedExpression.end(); ++it) {
-        cout << " + " << *it;
-    }
-    cout << endl;
-}
-
-//q7
-// Function to generate Gray code sequence.
-vector<int> grayCode(int n) {
-    vector<int> res;
-    for (int i = 0; i < (1 << n); i++) {
-        int val = i ^ (i >> 1);
-        res.push_back(val);
-    }
-    return res;
-}
-
-void generateKMap(vector<vector<bool>>& minterms, int numVariables) {
-    if (numVariables > 4 || numVariables < 2) {
-        cout << "K-Map generation only supports 2 to 4 variables." << endl;
-        return;
-    }
-
-    int rows = pow(2, ceil(numVariables / 2.0));
-    int cols = pow(2, floor(numVariables / 2.0));
-
-    vector<vector<int>> kmap(rows, vector<int>(cols, -1)); // Initialize K-Map with -1 (undefined)
-
-    // Generate Gray code for rows and columns
-    vector<int> rowGray = grayCode(ceil(numVariables / 2.0));
-    vector<int> colGray = grayCode(floor(numVariables / 2.0));
-
-    // Fill in the K-Map based on minterms
-    for (const auto& minterm : minterms) {
-        int row = 0, col = 0;
-        for (int i = 0; i < ceil(numVariables / 2.0); ++i) {
-            row = (row << 1) | minterm[i];
-        }
-        for (int i = ceil(numVariables / 2.0); i < numVariables; ++i) {
-            col = (col << 1) | minterm[i];
-        }
-        int rowIndex = find(rowGray.begin(), rowGray.end(), row) - rowGray.begin();
-        int colIndex = find(colGray.begin(), colGray.end(), col) - colGray.begin();
-        kmap[rowIndex][colIndex] = 1;
-    }
-
-    int rowBits = ceil(numVariables / 2.0);
-    int colBits = floor(numVariables / 2.0);
-
-    // Print column labels
-    cout << "  ";
-    for (int j : colGray) {
-        cout << bitset<sizeof(int) * 8>(j).to_string().substr(sizeof(int) * 8 - colBits) << " ";
-    }
-    cout << endl;
-
-    // Print horizontal line
-    cout << " +";
-    for (int j = 0; j < cols; ++j) {
-        cout << string(colBits, '-') << "-+";
-    }
-    cout << endl;
-
-    for (int i : rowGray) {
-        // Print row labels
-        cout << bitset<sizeof(int) * 8>(i).to_string().substr(sizeof(int) * 8 - rowBits) << "|";
-
-
-        int rowIndex = find(rowGray.begin(), rowGray.end(), i) - rowGray.begin();
-        for (int j : colGray) {
-            int colIndex = find(colGray.begin(), colGray.end(), j) - colGray.begin();
-            if (kmap[rowIndex][colIndex] == -1) {
-                cout << "0 ";
-            } else {
-                cout << kmap[rowIndex][colIndex] << " ";
-            }
-        }
-        cout << "|" << endl;
-
-        // Print horizontal line
-        cout << " +";
-        for (int j = 0; j < cols; ++j) {
-            cout << "--+";
-        }
-        cout << endl;
     }
 }
 
@@ -812,9 +684,6 @@ int main()
     set<implicationRow> primeImplicants, essentialPrimeImplicants;
     generatePrimeImplicants(Variables, minterms, primeImplicants);
 
-    //q3
-
-
 
     //q4
 
@@ -829,15 +698,17 @@ int main()
 
 
 
-//    // Dummy data for testing (You should replace these data from q3 and q4)
-//    vector<string> EPIs = {"AB", "AC"};  // Replace with your actual EPIs
-//    vector<string> PIs = {"AB", "AC", "BC"};  // Replace with your actual PIs
-//    minterms = {{1, 0, 1}, {1, 1, 0}};  // Replace with your actual minterms
-//    // Call the function to solve the PI table and print the minimized Boolean expression
-//    solvePITable(EPIs, PIs, minterms);
+   // Dummy data for testing (You should replace these data from q3 and q4)
+   vector<string> EPIs = {"AB", "AC"};  // Replace with your actual EPIs
+   vector<string> PIs = {"AB", "AC", "BC"};  // Replace with your actual PIs
+   vector<string> NPIs = {"BC"};
+   minterms = {{1, 0, 1}, {1, 1, 0}};  // Replace with your actual minterms
+   // Call the function to solve the PI table and print the minimized Boolean expression
+   solvePITable(EPIs, PIs, minterms);
+   solvePITable(EPIs, NPIs, minterms);
     int numVariables = 4;
 
-    generateKMap(minterms, numVariables);
+    //generateKMap(minterms, numVariables);
 
     return 0;
 }

@@ -3,6 +3,8 @@
         "vector": "cpp",
         "xtree": "cpp",
         "format": "cpp",
-        "xstring": "cpp"
+        "xstring": "cpp",
+        "ratio": "cpp",
+        "iostream": "cpp"
     }
 }
