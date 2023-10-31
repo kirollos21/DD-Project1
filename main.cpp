@@ -6,6 +6,8 @@
 #include <set>
 #include <stdlib.h>
 #include <bitset>
+#include <sstream>
+#include <fstream>
 using namespace std;
 struct implicationRow {
 
@@ -510,9 +512,9 @@ string findMinimumPI(const vector<bool>& minterm, const vector<string>& PIs) {
     return minPI;
 }
 
-void solvePITable(vector<string>& EPIs, vector<string>& PIs, vector<vector<bool>>& minterms) {
+string solvePITable(vector<string>& EPIs, vector<string>& PIs, vector<vector<bool>>& minterms) {
     set<string> minimizedExpression;
-
+    string minimizedExpr;
     // Add all EPIs to the minimized expression
     for (const auto& epi : EPIs) {
         minimizedExpression.insert(epi);
@@ -530,13 +532,16 @@ void solvePITable(vector<string>& EPIs, vector<string>& PIs, vector<vector<bool>
     cout << "Minimized Boolean Expression: ";
     auto it = minimizedExpression.begin();
     if (it != minimizedExpression.end()) {
+        minimizedExpr += *it;
         cout << *it;
         ++it;
     }
     for (; it != minimizedExpression.end(); ++it) {
+        minimizedExpr += " + " + *it;
         cout << " + " << *it;
     }
     cout << endl;
+    return minimizedExpr;
 }
 
 //q7
@@ -549,6 +554,7 @@ vector<int> grayCode(int n) {
     }
     return res;
 }
+
 
 void generateKMap(vector<vector<bool>>& minterms, int numVariables) {
     if (numVariables > 4 || numVariables < 2) {
@@ -622,6 +628,58 @@ void generateKMap(vector<vector<bool>>& minterms, int numVariables) {
 }
 
 
+
+
+string convertToWaveDrom(const string& minimizedFunction) {
+    stringstream waveDromScript;
+    waveDromScript << "[\"|\", ";
+
+    string term;
+    string andGroup;
+    for (char c : minimizedFunction) {
+        if (c == '+') {
+            if (!andGroup.empty()) {
+                term += "[\"&\", " + andGroup + "], ";
+                andGroup.clear();
+            }
+            waveDromScript << "[\"|\", " << term << "], ";
+            term.clear();
+        } else if (c == '\'') {
+            andGroup.back() = '~';
+        } else if (isalpha(c)) {
+            andGroup += string("\"") + c + "\", ";
+        }
+    }
+    if (!andGroup.empty()) {
+        term += "[\"&\", " + andGroup + "]";
+    }
+    if (!term.empty()) {
+        waveDromScript << "[\"|\", " << term << "]";
+    }
+
+    waveDromScript << "]";
+    return waveDromScript.str();
+}
+
+void generateHTMLFile(const std::string& waveDromScript) {
+    ofstream htmlFile("circuit.html");
+
+    htmlFile << "<!DOCTYPE html>\n";
+    htmlFile << "<body onload=\"WaveDrom.ProcessAll()\">\n";
+    htmlFile << "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/wavedrom/3.1.0/skins/default.js\" type=\"text/javascript\"></script>\n";
+    htmlFile << "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/wavedrom/3.1.0/wavedrom.min.js\" type=\"text/javascript\"></script>\n";
+    htmlFile << "<script type=\"WaveDrom\">\n";
+    htmlFile << "{ assign:[\n";
+    htmlFile << "  [\"out\",\n";
+    htmlFile << convertToWaveDrom(waveDromScript) << "\n";
+    htmlFile << "  ]\n";
+    htmlFile << "]}\n";
+    htmlFile << "</script>\n";
+    htmlFile << "</body>\n";
+
+    htmlFile.close();
+}
+
 int main()
 {
     bool flag;
@@ -680,6 +738,7 @@ int main()
     int numVariables = Variables.size();
 
     generateKMap(minterms, numVariables);
+    generateHTMLFile(solvePITable(EPIs, PIs, minterms));
 
     return 0;
 }
