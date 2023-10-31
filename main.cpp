@@ -8,12 +8,12 @@
 #include <bitset>
 #include <sstream>
 #include <fstream>
+#include <map>
 using namespace std;
 struct implicationRow {
 
         set<int> coveredMinterms;
         vector<char> mintermBits;
-        bool isFinal;
 
         void printRow() {
             if (coveredMinterms.empty()) return;
@@ -22,22 +22,37 @@ struct implicationRow {
             for (auto it = mintermBits.begin(); it != mintermBits.end(); it++) cout << *it;
             cout << endl;
         }
+        
         implicationRow combine(const implicationRow& other, const int& difBit) {
             implicationRow temp = implicationRow();
             temp.coveredMinterms = this->coveredMinterms;
-            for (int i = 0; i < difBit; i++) temp.mintermBits.push_back(this->mintermBits.at(mintermBits.size() - i - 1));
+            for (int i = 0; i < difBit; i++) temp.mintermBits.push_back(this->mintermBits.at(i));
             temp.mintermBits.push_back('-');
-            for (int i = difBit + 1; i < this->mintermBits.size(); i++)
-                temp.mintermBits.push_back(this->mintermBits.at(mintermBits.size() - i - 1));
+            for (int i = difBit + 1; i < this->mintermBits.size(); i++) temp.mintermBits.push_back(this->mintermBits.at(i));
             temp.coveredMinterms.insert(other.coveredMinterms.begin(), other.coveredMinterms.end());
+            cout << endl;
             return temp;            
+        }
+        
+        bool covers(const int& minterm) {
+            return (!coveredMinterms.empty()) && (coveredMinterms.find(minterm) != coveredMinterms.end());
+        }
+        
+        string booleanExpression(vector<char> variables) {
+            string boolExp = "";
+            for (auto it = mintermBits.begin(), var = variables.begin(); it != mintermBits.end(); it++, var++) {
+                switch (*it){
+                    case '0': boolExp += *var + "'"; break;
+                    case '1': boolExp += *var; break;
+                    default: continue;
+                }
+            }
+            return boolExp;
         }
     };
 
 inline bool operator<(implicationRow mt1, implicationRow mt2) {
-    if (mt1.coveredMinterms.empty() || mt2.coveredMinterms.empty()) return 0;
-    if (*mt1.coveredMinterms.begin() < *mt2.coveredMinterms.begin()) return 1;
-    return 0;
+    return tie(mt1.coveredMinterms, mt1.mintermBits) < tie(mt2.coveredMinterms, mt2.mintermBits);
 }
 
 bool logicallyAdj(vector<char> exp1, vector<char> exp2, int& differentBitIndex) {
@@ -50,7 +65,7 @@ bool logicallyAdj(vector<char> exp1, vector<char> exp2, int& differentBitIndex) 
             //     differentBitIndex = -1; return 0; 
             // }
             incons++;
-            differentBitIndex = exp1.size() - tempInd - 1;
+            differentBitIndex = tempInd;
         }
     }
     return incons == 1;
@@ -414,14 +429,13 @@ void generatePrimeImplicants(vector<char>& Variables, vector<vector<bool>>& mint
     implicationRow temp;
     int mintermVal = 0, p;
     for (auto i = minterms.begin(); i != minterms.end(); i++) {
-        p = 0;
+        p = Variables.size() - 1;
         mintermVal = 0;
-        for (auto j = (*i).rbegin(); j != (*i).rend(); j++, p++) {
+        for (auto j = (*i).begin(); j != (*i).end(); j++, p--) {
             mintermVal += pow(2, p) * *j;
             temp.mintermBits.push_back( *j ? '1' : '0');
         }
         temp.coveredMinterms.insert(mintermVal);
-        temp.isFinal = 0;
         implicants1.insert(temp);
         temp = implicationRow();
     }
@@ -437,7 +451,6 @@ void generatePrimeImplicants(vector<char>& Variables, vector<vector<bool>>& mint
             while (it2 != implicants1.end()) {
                 if (logicallyAdj((*it1).mintermBits, (*it2).mintermBits, dif)) {
                     indivFinal = false;
-                    cout << "Match found\n";
                     // Have to store the iterator contents in a variable to call the struct method
                     implicationRow x = *it1; 
                     implicants2.insert(x.combine(*it2, dif));
@@ -453,6 +466,7 @@ void generatePrimeImplicants(vector<char>& Variables, vector<vector<bool>>& mint
             implicants1.clear();
             for (auto it = implicants2.begin(); it != implicants2.end(); it++) implicants1.insert(*it);
             implicants2.clear(); 
+            cout << "\n\n";
             } // Shifts the implicants one column to the left, and resumes
     }
 
@@ -464,6 +478,19 @@ void generatePrimeImplicants(vector<char>& Variables, vector<vector<bool>>& mint
         tester.printRow();
     }
     primes = primeImplicants;
+}
+
+void classifyEssentials(set<implicationRow> primes, map<implicationRow, string> essentials, map<implicationRow, string> nonEssentials) {
+    implicationRow temp;
+    set<int>::iterator num;
+    set<implicationRow>::iterator ch;
+
+    for (auto it = primes.begin(); it != primes.end(); it++) {        
+        for (auto num = (*it).coveredMinterms.begin(); num != (*it).coveredMinterms.end(); num++) {
+            ch = primes.begin();
+            
+        }
+    }
 }
 
 bool coversMinterm(const string& pi, const vector<bool>& minterm) {
@@ -514,7 +541,8 @@ string findMinimumPI(const vector<bool>& minterm, const vector<string>& PIs) {
 
 string solvePITable(vector<string>& EPIs, vector<string>& PIs, vector<vector<bool>>& minterms) {
     set<string> minimizedExpression;
-    string minimizedExpr = "";
+    string minimized = "";
+
     // Add all EPIs to the minimized expression
     for (const auto& epi : EPIs) {
         minimizedExpression.insert(epi);
@@ -532,16 +560,16 @@ string solvePITable(vector<string>& EPIs, vector<string>& PIs, vector<vector<boo
     cout << "Minimized Boolean Expression: ";
     auto it = minimizedExpression.begin();
     if (it != minimizedExpression.end()) {
-        minimizedExpr += *it;
         cout << *it;
+        minimized += *it;
         ++it;
     }
     for (; it != minimizedExpression.end(); ++it) {
-        minimizedExpr += " + " + *it;
         cout << " + " << *it;
+        minimized += " + " + *it;
     }
     cout << endl;
-    return minimizedExpr;
+    return minimized;
 }
 
 //q7
@@ -833,7 +861,6 @@ void generateHTMLFile(const std::string& waveDromScript) {
 }
 
 
-
 int main()
 {
     bool flag;
@@ -862,12 +889,9 @@ int main()
     } while (flag);
 
     generateTruthTable(function, Variables, minterms);
-
+    
     set<implicationRow> primeImplicants, essentialPrimeImplicants;
     generatePrimeImplicants(Variables, minterms, primeImplicants);
-
-    //q3
-
 
 
     //q4
@@ -884,11 +908,10 @@ int main()
 
 
    // Dummy data for testing (You should replace these data from q3 and q4)
-    vector<string> EPIs = {"AD", "AC","BC"};  // Replace with your actual EPIs
-    vector<string> PIs = {"AD", "AC", "BC"};  // Replace with your actual PIs
-
-    // Call the function to solve the PI table and print the minimized Boolean expression
-    solvePITable(EPIs, PIs, minterms);
+   vector<string> EPIs = {"AB", "AC"};  // Replace with your actual EPIs
+   vector<string> PIs = {"AB", "AC", "BC"};  // Replace with your actual PIs
+   minterms = {{1, 0, 1}, {1, 1, 0}};  // Replace with your actual minterms
+   // Call the function to solve the PI table and print the minimized Boolean expression
     int numVariables = Variables.size();
 
 //    generateKMap(minterms, numVariables);
