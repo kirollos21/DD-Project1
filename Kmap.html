@@ -94,10 +94,10 @@
         kmapDiv.innerHTML = tableHtml;
     }
 
-    const minterms = [[0,0,0,0,0],[0,0,0,1,0],[0,0,0,1,1],[0,1,0,0,0],[0,1,0,1,0],[1,0,0,0,0],[1,0,0,0,1],[1,0,0,1,0],[1,0,0,1,1],[1,0,1,0,1],[1,1,0,0,0],[1,1,0,1,0]];
+    const minterms = [[0,1,1,0],[1,0,0,0],[1,0,0,1],[1,1,0,0],[1,1,0,1],[1,1,1,0],[1,1,1,1]];
 
-    const numVariables = 5;
-    const variables = ['a','b','c','d','e'];
+    const numVariables = 4;
+    const variables = ['i','j','k','l'];
     generateKMap(minterms, numVariables, variables);
     </script>
 </body>

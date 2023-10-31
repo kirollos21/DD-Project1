@@ -64,7 +64,6 @@ struct implicationRow {
             temp.mintermBits.push_back('-');
             for (int i = difBit + 1; i < this->mintermBits.size(); i++) temp.mintermBits.push_back(this->mintermBits.at(i));
             temp.coveredMinterms.insert(other.coveredMinterms.begin(), other.coveredMinterms.end());
-            std::cout << endl;
             return temp;            
         }
         
@@ -241,7 +240,7 @@ void generateTruthTable(string& function, vector <char>& Variables, vector<vecto
     vector<bool> minterm;
     string canonical_PoS = "";
     string canonical_SoP = "";
-    std::cout << "Truth Table:" << endl;
+    std::cout << "\nTruth Table:" << endl;
     
     int numVariables = 0;
     for (char c : function)
@@ -380,84 +379,87 @@ void generateTruthTable(string& function, vector <char>& Variables, vector<vecto
     canonical_SoP.pop_back();
     canonical_SoP.pop_back();
     
-    std::cout << "canonical SoP : " << canonical_SoP << endl << "canonical PoS : " << canonical_PoS << endl;
+    std::cout << "\nCanonical SoP : " << canonical_SoP << endl << "\nCanonical PoS : " << canonical_PoS << endl;
 }
 
 void generatePrimeImplicants(vector<char>& Variables, vector<vector<bool>>& minterms, set<implicationRow>& primes)
 {
 
-    vector<vector<vector<bool>>> groups;
-    int maxOnes = 0;
+    /*
+    // DRAFT 1, Scrapped
+    // vector<vector<vector<bool>>> groups;
+    // int maxOnes = 0;
     
-    for (const auto& minterm : minterms)
-    {
-        int onesCount = count(minterm.begin(), minterm.end(), true);
-        maxOnes = max(maxOnes, onesCount);
-    }
-    groups.resize(maxOnes + 1);
+    // for (const auto& minterm : minterms)
+    // {
+    //     int onesCount = count(minterm.begin(), minterm.end(), true);
+    //     maxOnes = max(maxOnes, onesCount);
+    // }
+    // groups.resize(maxOnes + 1);
 
-    for (const auto& minterm : minterms)
-    {
-        int onesCount = count(minterm.begin(), minterm.end(), true);
-        groups[onesCount].push_back(minterm);
-    }
+    // for (const auto& minterm : minterms)
+    // {
+    //     int onesCount = count(minterm.begin(), minterm.end(), true);
+    //     groups[onesCount].push_back(minterm);
+    // }
 
-    std::cout << "Prime Implicants:" << endl;
+    // std::cout << "Prime Implicants:" << endl;
 
-    set<string> seen;
+    // set<string> seen;
     
-    for (int i = 0; i < groups.size(); ++i)
-    {
-        for (const auto& term1 : groups[i])
-        {
-            for (int j = i + 1; j < groups.size(); ++j)
-            {
-                for (const auto& term2 : groups[j])
-                {
-                    int diffBits = 0;
-                    int diffIndex = -1;
+    // for (int i = 0; i < groups.size(); ++i)
+    // {
+    //     for (const auto& term1 : groups[i])
+    //     {
+    //         for (int j = i + 1; j < groups.size(); ++j)
+    //         {
+    //             for (const auto& term2 : groups[j])
+    //             {
+    //                 int diffBits = 0;
+    //                 int diffIndex = -1;
 
-                    for (int k = 0; k < term1.size(); ++k)
-                    {
-                        if (term1[k] != term2[k])
-                        {
-                            diffBits++;
-                            diffIndex = k;
-                        }
-                    }
+    //                 for (int k = 0; k < term1.size(); ++k)
+    //                 {
+    //                     if (term1[k] != term2[k])
+    //                     {
+    //                         diffBits++;
+    //                         diffIndex = k;
+    //                     }
+    //                 }
                     
-                    if (diffBits == 1)
-                    {
-                        string primeImplicant;
-                        for (int k = 0; k < term1.size(); ++k)
-                        {
-                            if (k != diffIndex)
-                            {
-                                if (term1[k] || term2[k])
-                                {
-                                    primeImplicant += Variables[k];
-                                }
-                            }
-                        }
+    //                 if (diffBits == 1)
+    //                 {
+    //                     string primeImplicant;
+    //                     for (int k = 0; k < term1.size(); ++k)
+    //                     {
+    //                         if (k != diffIndex)
+    //                         {
+    //                             if (term1[k] || term2[k])
+    //                             {
+    //                                 primeImplicant += Variables[k];
+    //                             }
+    //                         }
+    //                     }
                         
-                        if (seen.find(primeImplicant) == seen.end()) {
-                            std::cout << "PI: " << primeImplicant << " Covers Minterms: ";
-                            for (const auto& m : {term1, term2})
-                            {
-                                for (int k = 0; k < m.size(); ++k)
-                                {
-                                    std::cout << m[k];
-                                }
-                                std::cout << '\t';
-                            }
-                            std::cout << endl;
-                            seen.insert(primeImplicant);
-                        }
-                    }
-                }
-            }
-        }
-    }
+    //                     if (seen.find(primeImplicant) == seen.end()) {
+    //                         std::cout << "PI: " << primeImplicant << " Covers Minterms: ";
+    //                         for (const auto& m : {term1, term2})
+    //                         {
+    //                             for (int k = 0; k < m.size(); ++k)
+    //                             {
+    //                                 std::cout << m[k];
+    //                             }
+    //                             std::cout << '\t';
+    //                         }
+    //                         std::cout << endl;
+    //                         seen.insert(primeImplicant);
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+    */
 
     // Use Implication Table and pick minterms with logical distances of 1 (with relatively naive algorithm) to combine
     // 2 maps to continuously push the simplified iteration, and then we scan at the end and add the finals to the PI table
@@ -508,7 +510,7 @@ void generatePrimeImplicants(vector<char>& Variables, vector<vector<bool>>& mint
     }
 
     implicationRow tester;
-    std::cout << "ALL Prime Implicants:\n-----------------\nCovered Minterms\tIn Binary\n-----------------\n";
+    std::cout << "\n\nALL Prime Implicants:\n-----------------\nCovered Minterms\tIn Binary\n----------------------------------\n";
 
     for (auto it = primeImplicants.begin(); it != primeImplicants.end(); it++) {
         tester = *it;
@@ -565,7 +567,7 @@ void classifyEssentials(set<implicationRow> primes, set<implicationRow> essentia
     
     std::cout << "\nNon-Essential Prime Implicant Expressions: ";
     printVec(nonEssentialExpressions);
-    cout << endl;
+    cout << endl ;
 
     set<int> uncoveredMinterms;
 
@@ -583,7 +585,7 @@ void classifyEssentials(set<implicationRow> primes, set<implicationRow> essentia
 
     std::cout << "\nMinterms not Covered by Essential Prime Implicants: ";
     printSet(uncoveredMinterms);
-    cout << endl;
+    cout << "\n\n";
 
 }
 
@@ -887,7 +889,7 @@ void generateWebFiles(const vector<vector<bool>>& minterms, int numVariables, co
     )";
 
     htmlFile.close();
-    cout << "HTML file has been generated." << endl;
+    cout << "HTML file has been generated." << "\n\n";
 }
 
 string convertToWaveDrom(const string& minimizedFunction) {
@@ -958,17 +960,16 @@ void generateHTMLFile(const std::string& waveDromScript) {
 }
 
 
-int main()
+void testProgram(string function)
 {
+    // Cin functionality removed and function returns on invalid expression for testing purposes
     bool flag;
-    string function;
     vector <char> Variables;
     vector<vector<bool>> minterms;
     do
     {
         flag = false;
-        std::cout << "Enter a Boolean function in SoP or PoS form: ";
-        getline(cin, function);
+        std::cout << "Enter a Boolean function in SoP or PoS form: " << function << endl;
 
         if (isValidSoP(function))
         {
@@ -982,6 +983,7 @@ int main()
         {
             std::cout << "Invalid expression. Try another one!" << endl;
             flag = true;
+            return;
         }
     } while (flag);
 
@@ -998,29 +1000,25 @@ int main()
     generateWebFiles(minterms, Variables.size(), Variables);
     generateHTMLFile(solvePITable(essentialExpressions, nonEssentialExpressions, minterms));
 
-    // implicationRow x;
-    // char nums[] = {'1','0','-'};
-    // char vars[] = {'a', 'b', 'c'};
-    // vector<char> varss;
-    // for (char i : vars) varss.push_back(i);
-    // for (char i : nums) x.mintermBits.push_back(i);
-    // cout << x.booleanExpression(varss);
-
-
-    //q4
-
-
-
-
-    //q5
-
-
-
-
-
 
 //    generateKMap(minterms, numVariables);
     
+}
 
+
+int main() {
+    
+    string trials[] =
+        {"a ++ b", "a + !b + c", "a*b + c", // Invalids
+        "c'd'e' + b'c'd + bc'e' + ab'd'e", "a + b", "ab + cd' + ad", "A'B+AC+ACD", "DC + BD + C'B + AD", // Valids
+        "yw+x'zw", "X'Y'+X'W+X'YZW+XYZW", "z + xy + xz'", "xa + yb + y'xb", "ijk + ik' + jkl'" // Valids
+        };
+
+    for (string s : trials) {
+        cout << "\n\n\n--------------------------------------------------" <<
+            "\n\nRUNNING TEST ON EXPRESSION: \"" << s << "\"\n\n"
+            << "--------------------------------------------------\n\n\n"; 
+        testProgram(s);
+    }
     return 0;
 }
