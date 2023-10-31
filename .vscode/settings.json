@@ -3,6 +3,7 @@
         "vector": "cpp",
         "xtree": "cpp",
         "format": "cpp",
+<<<<<<< HEAD
         "xstring": "cpp",
         "ratio": "cpp",
         "iostream": "cpp",
@@ -63,5 +64,8 @@
         "xmemory": "cpp",
         "xtr1common": "cpp",
         "xutility": "cpp"
+=======
+        "xstring": "cpp"
+>>>>>>> 1e7ff977ca1cd83fee7e1f9de85844c7ee9e433a
     }
 }

@@ -6,7 +6,6 @@
 #include <set>
 #include <stdlib.h>
 #include <bitset>
-#include <format>
 #include <sstream>
 #include <fstream>
 #include <map>
@@ -625,8 +624,9 @@ string findMinimumPI(const vector<bool>& minterm, const vector<string>& PIs) {
     return minPI;
 }
 
-void solvePITable(vector<string>& EPIs, vector<string>& PIs, vector<vector<bool>>& minterms) {
+string solvePITable(vector<string>& EPIs, vector<string>& PIs, vector<vector<bool>>& minterms) {
     set<string> minimizedExpression;
+    string minimized = "";
 
     // Add all EPIs to the minimized expression
     for (const auto& epi : EPIs) {
@@ -645,96 +645,238 @@ void solvePITable(vector<string>& EPIs, vector<string>& PIs, vector<vector<bool>
     std::cout << "Minimized Boolean Expression: ";
     auto it = minimizedExpression.begin();
     if (it != minimizedExpression.end()) {
-        std::cout << *it;
+        cout << *it;
+        minimized += *it;
         ++it;
     }
     for (; it != minimizedExpression.end(); ++it) {
-        std::cout << " + " << *it;
+        cout << " + " << *it;
+        minimized += " + " + *it;
     }
-    std::cout << endl;
+    cout << endl;
+    return minimized;
 }
 
 //q7
 // Function to generate Gray code sequence.
-vector<int> grayCode(int n) {
-    vector<int> res;
-    for (int i = 0; i < (1 << n); i++) {
-        int val = i ^ (i >> 1);
-        res.push_back(val);
+//vector<int> grayCode(int n) {
+//    vector<int> res;
+//    for (int i = 0; i < (1 << n); i++) {
+//        int val = i ^ (i >> 1);
+//        res.push_back(val);
+//    }
+//    return res;
+//}
+//
+//
+//void generateKMap(vector<vector<bool>>& minterms, int numVariables) {
+//    if (numVariables > 4 || numVariables < 2) {
+//        cout << "K-Map generation only supports 2 to 4 variables." << endl;
+//        return;
+//    }
+//
+//    int rows = pow(2, ceil(numVariables / 2.0));
+//    int cols = pow(2, floor(numVariables / 2.0));
+//
+//    vector<vector<int>> kmap(rows, vector<int>(cols, -1)); // Initialize K-Map with -1 (undefined)
+//
+//    // Generate Gray code for rows and columns
+//    vector<int> rowGray = grayCode(ceil(numVariables / 2.0));
+//    vector<int> colGray = grayCode(floor(numVariables / 2.0));
+//
+//    // Fill in the K-Map based on minterms
+//    for (const auto& minterm : minterms) {
+//        int row = 0, col = 0;
+//        for (int i = 0; i < ceil(numVariables / 2.0); ++i) {
+//            row = (row << 1) | minterm[i];
+//        }
+//        for (int i = ceil(numVariables / 2.0); i < numVariables; ++i) {
+//            col = (col << 1) | minterm[i];
+//        }
+//        int rowIndex = find(rowGray.begin(), rowGray.end(), row) - rowGray.begin();
+//        int colIndex = find(colGray.begin(), colGray.end(), col) - colGray.begin();
+//        kmap[rowIndex][colIndex] = 1;
+//    }
+//
+//    int rowBits = ceil(numVariables / 2.0);
+//    int colBits = floor(numVariables / 2.0);
+//
+//    // Print column labels
+//    cout << "  ";
+//    for (int j : colGray) {
+//        cout << bitset<sizeof(int) * 8>(j).to_string().substr(sizeof(int) * 8 - colBits) << " ";
+//    }
+//    cout << endl;
+//
+//    // Print horizontal line
+//    cout << " +";
+//    for (int j = 0; j < cols; ++j) {
+//        cout << string(colBits, '-') << "-+";
+//    }
+//    cout << endl;
+//
+//    for (int i : rowGray) {
+//        // Print row labels
+//        cout << bitset<sizeof(int) * 8>(i).to_string().substr(sizeof(int) * 8 - rowBits) << "|";
+//
+//
+//        int rowIndex = find(rowGray.begin(), rowGray.end(), i) - rowGray.begin();
+//        for (int j : colGray) {
+//            int colIndex = find(colGray.begin(), colGray.end(), j) - colGray.begin();
+//            if (kmap[rowIndex][colIndex] == -1) {
+//                cout << "0 ";
+//            } else {
+//                cout << kmap[rowIndex][colIndex] << " ";
+//            }
+//        }
+//        cout << "|" << endl;
+//
+//        // Print horizontal line
+//        cout << " +";
+//        for (int j = 0; j < cols; ++j) {
+//            cout << "--+";
+//        }
+//        cout << endl;
+//    }
+//}
+
+// Utility function to join the variables
+string join(const vector<char>& vec, const string& delim) {
+    ostringstream oss;
+    for (const auto& ch : vec) {
+        oss << ch << delim;
     }
-    return res;
+    string result = oss.str();
+    return result.substr(0, result.length() - delim.length());
 }
 
-void generateKMap(vector<vector<bool>>& minterms, int numVariables) {
-    if (numVariables > 4 || numVariables < 2) {
-        std::cout << "K-Map generation only supports 2 to 4 variables." << endl;
-        return;
-    }
-
-    int rows = pow(2, ceil(numVariables / 2.0));
-    int cols = pow(2, floor(numVariables / 2.0));
-
-    vector<vector<int>> kmap(rows, vector<int>(cols, -1)); // Initialize K-Map with -1 (undefined)
-
-    // Generate Gray code for rows and columns
-    vector<int> rowGray = grayCode(ceil(numVariables / 2.0));
-    vector<int> colGray = grayCode(floor(numVariables / 2.0));
-
-    // Fill in the K-Map based on minterms
-    for (const auto& minterm : minterms) {
-        int row = 0, col = 0;
-        for (int i = 0; i < ceil(numVariables / 2.0); ++i) {
-            row = (row << 1) | minterm[i];
+void generateWebFiles(const vector<vector<bool>>& minterms, int numVariables, const vector<char>& variables) {
+    ofstream htmlFile("Kmap.html");
+    htmlFile << R"(
+<!DOCTYPE html>
+<html>
+<head>
+    <title>K-Map Generator</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
         }
-        for (int i = ceil(numVariables / 2.0); i < numVariables; ++i) {
-            col = (col << 1) | minterm[i];
+        #kmap {
+            border-collapse: collapse;
         }
-        int rowIndex = find(rowGray.begin(), rowGray.end(), row) - rowGray.begin();
-        int colIndex = find(colGray.begin(), colGray.end(), col) - colGray.begin();
-        kmap[rowIndex][colIndex] = 1;
+        .cell {
+            border: 1px solid black;
+            width: 50px;
+            height: 50px;
+            text-align: center;
+        }
+        .cell-group1 { background-color: red; }
+        .cell-group2 { background-color: blue; }
+        .cell-group3 { background-color: yellow; }
+        .cell-group4 { background-color: green; }
+        .cell-group5 { background-color: orange; }
+        .cell-group6 { background-color: purple; }
+        .cell-group7 { background-color: pink; }
+        .cell-group8 { background-color: brown; }
+    </style>
+</head>
+<body>
+    <div id="kmap"></div>
+    <script>
+    function grayCode(n) {
+        if (n === 1) return ['0', '1'];
+        const prevGray = grayCode(n - 1);
+        const currGray = [];
+        for (const code of prevGray) {
+            currGray.push('0' + code);
+        }
+        for (let i = prevGray.length - 1; i >= 0; i--) {
+            currGray.push('1' + prevGray[i]);
+        }
+        return currGray;
     }
 
-    int rowBits = ceil(numVariables / 2.0);
-    int colBits = floor(numVariables / 2.0);
+    function generateKMap(minterms, numVariables, variables) {
+        const kmapDiv = document.getElementById('kmap');
+        const rows = Math.pow(2, Math.ceil(numVariables / 2));
+        const cols = Math.pow(2, Math.floor(numVariables / 2));
+        let kmap = Array.from({ length: rows }, () => Array(cols).fill(-1));
 
-    // Print column labels
-    std::cout << "  ";
-    for (int j : colGray) {
-        std::cout << bitset<sizeof(int) * 8>(j).to_string().substr(sizeof(int) * 8 - colBits) << " ";
-    }
-    std::cout << endl;
+        const rowGray = grayCode(Math.ceil(numVariables / 2));
+        const colGray = grayCode(Math.floor(numVariables / 2));
 
-    // Print horizontal line
-    std::cout << " +";
-    for (int j = 0; j < cols; ++j) {
-        std::cout << string(colBits, '-') << "-+";
-    }
-    std::cout << endl;
+        const rowGrayMap = {};
+        const colGrayMap = {};
+        rowGray.forEach((code, index) => rowGrayMap[parseInt(code, 2)] = index);
+        colGray.forEach((code, index) => colGrayMap[parseInt(code, 2)] = index);
 
-    for (int i : rowGray) {
-        // Print row labels
-        std::cout << bitset<sizeof(int) * 8>(i).to_string().substr(sizeof(int) * 8 - rowBits) << "|";
-
-
-        int rowIndex = find(rowGray.begin(), rowGray.end(), i) - rowGray.begin();
-        for (int j : colGray) {
-            int colIndex = find(colGray.begin(), colGray.end(), j) - colGray.begin();
-            if (kmap[rowIndex][colIndex] == -1) {
-                std::cout << "0 ";
-            } else {
-                std::cout << kmap[rowIndex][colIndex] << " ";
+        minterms.forEach(minterm => {
+            let row = 0, col = 0;
+            for (let i = 0; i < Math.ceil(numVariables / 2); ++i) {
+                row = (row << 1) | minterm[i];
             }
-        }
-        std::cout << "|" << endl;
+            for (let i = Math.ceil(numVariables / 2); i < numVariables; ++i) {
+                col = (col << 1) | minterm[i];
+            }
+            const rowIndex = rowGrayMap[row];
+            const colIndex = colGrayMap[col];
+            kmap[rowIndex][colIndex] = 1;
+        });
 
-        // Print horizontal line
-        std::cout << " +";
-        for (int j = 0; j < cols; ++j) {
-            std::cout << "--+";
+        let rowVars = variables.slice(0, Math.ceil(numVariables / 2)).join('');
+        let colVars = variables.slice(Math.ceil(numVariables / 2)).join('');
+
+        let tableHtml = '<table>';
+        tableHtml += '<tr><th></th>';
+        colGray.forEach(code => {
+            tableHtml += `<th>${code}(${colVars})</th>`;
+        });
+        tableHtml += '</tr>';
+        for (let i = 0; i < rows; i++) {
+            tableHtml += `<tr><td>${rowGray[i]}(${rowVars})</td>`;
+            for (let j = 0; j < cols; j++) {
+                tableHtml += `<td class=\"cell ${kmap[i][j] === 1 ? 'cell-group1' : ''}\">${kmap[i][j] === -1 ? '0' : kmap[i][j]}</td>`;
+            }
+            tableHtml += '</tr>';
         }
-        std::cout << endl;
+        tableHtml += '</table>';
+
+        kmapDiv.innerHTML = tableHtml;
     }
+
+    const minterms = )";
+
+    // Write minterms to HTML file
+    htmlFile << "[";
+    for (const auto& minterm : minterms) {
+        htmlFile << "[";
+        for (bool bit : minterm) {
+            htmlFile << (bit ? "1," : "0,");
+        }
+        htmlFile.seekp(-1, ios_base::cur);
+        htmlFile << "],";
+    }
+    htmlFile.seekp(-1, ios_base::cur);
+    htmlFile << "];" << endl;
+
+    htmlFile << R"(
+    const numVariables = )" << numVariables << R"(;
+    const variables = [')" << join(variables, "','") << R"('];
+    generateKMap(minterms, numVariables, variables);
+    </script>
+</body>
+</html>
+    )";
+
+    htmlFile.close();
+    cout << "HTML file has been generated." << endl;
 }
+
+
 
 string convertToWaveDrom(const string& minimizedFunction) {
     stringstream waveDromScript;
@@ -745,11 +887,13 @@ string convertToWaveDrom(const string& minimizedFunction) {
     for (char c : minimizedFunction) {
         if (c == '+') {
             if (!andGroup.empty()) {
-                term += "[\"&\", " + andGroup + "], ";
+                term += "[\"&\", " + andGroup + "]";
                 andGroup.clear();
             }
-            waveDromScript << "[\"|\", " << term << "], ";
-            term.clear();
+            if (!term.empty()) {
+                waveDromScript << term + ", ";
+                term.clear();
+            }
         } else if (c == '\'') {
             andGroup.back() = '~';
         } else if (isalpha(c)) {
@@ -760,7 +904,7 @@ string convertToWaveDrom(const string& minimizedFunction) {
         term += "[\"&\", " + andGroup + "]";
     }
     if (!term.empty()) {
-        waveDromScript << "[\"|\", " << term << "]";
+        waveDromScript << term;
     }
 
     waveDromScript << "]";
@@ -771,6 +915,21 @@ void generateHTMLFile(const std::string& waveDromScript) {
     ofstream htmlFile("circuit.html");
 
     htmlFile << "<!DOCTYPE html>\n";
+    htmlFile << "<head>\n";
+    htmlFile << "<style>\n";
+    htmlFile << "svg {\n";
+    htmlFile << "  transform: scale(2);  /* Scaling the SVG by 2 times its original size */\n";
+    htmlFile << "  display: block;\n";   // Ensures the SVG block is centered
+    htmlFile << "  margin: auto;\n";     // Centers the SVG horizontally
+    htmlFile << "}\n";
+    htmlFile << "body {\n";
+    htmlFile << "  display: flex;\n";       // Use flexbox for vertical centering
+    htmlFile << "  height: 100vh;\n";       // Use full viewport height
+    htmlFile << "  align-items: center;\n"; // Centers the content vertically
+    htmlFile << "  justify-content: center;\n"; // Centers the content horizontally
+    htmlFile << "}\n";
+    htmlFile << "</style>\n";
+    htmlFile << "</head>\n";
     htmlFile << "<body onload=\"WaveDrom.ProcessAll()\">\n";
     htmlFile << "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/wavedrom/3.1.0/skins/default.js\" type=\"text/javascript\"></script>\n";
     htmlFile << "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/wavedrom/3.1.0/wavedrom.min.js\" type=\"text/javascript\"></script>\n";
@@ -785,6 +944,7 @@ void generateHTMLFile(const std::string& waveDromScript) {
 
     htmlFile.close();
 }
+
 
 int main()
 {
@@ -845,18 +1005,16 @@ int main()
 
 
 
-//    // Dummy data for testing (You should replace these data from q3 and q4)
-//    vector<string> EPIs = {"AB", "AC"};  // Replace with your actual EPIs
-//    vector<string> PIs = {"AB", "AC", "BC"};  // Replace with your actual PIs
-//    vector<string> NPIs = {"BC"};
-//    minterms = {{1, 0, 1}, {1, 1, 0}};  // Replace with your actual minterms
-//    // Call the function to solve the PI table and print the minimized Boolean expression
-//    solvePITable(EPIs, PIs, minterms);
-//    solvePITable(EPIs, NPIs, minterms);
-//     int numVariables = 4;
+   // Dummy data for testing (You should replace these data from q3 and q4)
+   vector<string> EPIs = {"AB", "AC"};  // Replace with your actual EPIs
+   vector<string> PIs = {"AB", "AC", "BC"};  // Replace with your actual PIs
+   minterms = {{1, 0, 1}, {1, 1, 0}};  // Replace with your actual minterms
+   // Call the function to solve the PI table and print the minimized Boolean expression
+    int numVariables = Variables.size();
 
-    //generateKMap(minterms, numVariables);
-    // generateHTMLFile(solvePITable(EPIs, PIs, minterms));
+//    generateKMap(minterms, numVariables);
+    generateWebFiles(minterms, numVariables, Variables);
+    generateHTMLFile(solvePITable(EPIs, PIs, minterms));
 
     return 0;
 }
