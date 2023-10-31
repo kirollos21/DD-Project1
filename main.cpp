@@ -3,13 +3,13 @@
 #include <vector>
 #include <algorithm>
 #include <cmath>
-#include <string>
 #include <set>
 #include <stdlib.h>
-#include <map>
 #include <bitset>
 #include <format>
-
+#include <sstream>
+#include <fstream>
+#include <map>
 using namespace std;
 struct implicationRow {
 
@@ -55,7 +55,6 @@ struct implicationRow {
 inline bool operator<(implicationRow mt1, implicationRow mt2) {
     return tie(mt1.coveredMinterms, mt1.mintermBits) < tie(mt2.coveredMinterms, mt2.mintermBits);
 }
-
 
 bool logicallyAdj(vector<char> exp1, vector<char> exp2, int& differentBitIndex) {
     if (exp1.size() != exp2.size()) { differentBitIndex = -1; return 0; }
@@ -652,6 +651,56 @@ void generateKMap(vector<vector<bool>>& minterms, int numVariables) {
     }
 }
 
+string convertToWaveDrom(const string& minimizedFunction) {
+    stringstream waveDromScript;
+    waveDromScript << "[\"|\", ";
+
+    string term;
+    string andGroup;
+    for (char c : minimizedFunction) {
+        if (c == '+') {
+            if (!andGroup.empty()) {
+                term += "[\"&\", " + andGroup + "], ";
+                andGroup.clear();
+            }
+            waveDromScript << "[\"|\", " << term << "], ";
+            term.clear();
+        } else if (c == '\'') {
+            andGroup.back() = '~';
+        } else if (isalpha(c)) {
+            andGroup += string("\"") + c + "\", ";
+        }
+    }
+    if (!andGroup.empty()) {
+        term += "[\"&\", " + andGroup + "]";
+    }
+    if (!term.empty()) {
+        waveDromScript << "[\"|\", " << term << "]";
+    }
+
+    waveDromScript << "]";
+    return waveDromScript.str();
+}
+
+void generateHTMLFile(const std::string& waveDromScript) {
+    ofstream htmlFile("circuit.html");
+
+    htmlFile << "<!DOCTYPE html>\n";
+    htmlFile << "<body onload=\"WaveDrom.ProcessAll()\">\n";
+    htmlFile << "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/wavedrom/3.1.0/skins/default.js\" type=\"text/javascript\"></script>\n";
+    htmlFile << "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/wavedrom/3.1.0/wavedrom.min.js\" type=\"text/javascript\"></script>\n";
+    htmlFile << "<script type=\"WaveDrom\">\n";
+    htmlFile << "{ assign:[\n";
+    htmlFile << "  [\"out\",\n";
+    htmlFile << convertToWaveDrom(waveDromScript) << "\n";
+    htmlFile << "  ]\n";
+    htmlFile << "]}\n";
+    htmlFile << "</script>\n";
+    htmlFile << "</body>\n";
+
+    htmlFile.close();
+}
+
 int main()
 {
     bool flag;
@@ -709,6 +758,7 @@ int main()
     int numVariables = 4;
 
     //generateKMap(minterms, numVariables);
+    // generateHTMLFile(solvePITable(EPIs, PIs, minterms));
 
     return 0;
 }

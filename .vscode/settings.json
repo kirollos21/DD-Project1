@@ -5,6 +5,7 @@
         "format": "cpp",
         "xstring": "cpp",
         "ratio": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "algorithm": "cpp"
     }
 }
