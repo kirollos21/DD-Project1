@@ -1,0 +1,105 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>K-Map Generator</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #kmap {
+            border-collapse: collapse;
+        }
+        .cell {
+            border: 1px solid black;
+            width: 50px;
+            height: 50px;
+            text-align: center;
+        }
+        .cell-group1 { background-color: red; }
+        .cell-group2 { background-color: blue; }
+        .cell-group3 { background-color: yellow; }
+        .cell-group4 { background-color: green; }
+        .cell-group5 { background-color: orange; }
+        .cell-group6 { background-color: purple; }
+        .cell-group7 { background-color: pink; }
+        .cell-group8 { background-color: brown; }
+    </style>
+</head>
+<body>
+    <div id="kmap"></div>
+    <script>
+    function grayCode(n) {
+        if (n === 1) return ['0', '1'];
+        const prevGray = grayCode(n - 1);
+        const currGray = [];
+        for (const code of prevGray) {
+            currGray.push('0' + code);
+        }
+        for (let i = prevGray.length - 1; i >= 0; i--) {
+            currGray.push('1' + prevGray[i]);
+        }
+        return currGray;
+    }
+
+    function generateKMap(minterms, numVariables, variables) {
+        const kmapDiv = document.getElementById('kmap');
+        const rows = Math.pow(2, Math.ceil(numVariables / 2));
+        const cols = Math.pow(2, Math.floor(numVariables / 2));
+        let kmap = Array.from({ length: rows }, () => Array(cols).fill(-1));
+
+        const rowGray = grayCode(Math.ceil(numVariables / 2));
+        const colGray = grayCode(Math.floor(numVariables / 2));
+
+        const rowGrayMap = {};
+        const colGrayMap = {};
+        rowGray.forEach((code, index) => rowGrayMap[parseInt(code, 2)] = index);
+        colGray.forEach((code, index) => colGrayMap[parseInt(code, 2)] = index);
+
+        minterms.forEach(minterm => {
+            let row = 0, col = 0;
+            for (let i = 0; i < Math.ceil(numVariables / 2); ++i) {
+                row = (row << 1) | minterm[i];
+            }
+            for (let i = Math.ceil(numVariables / 2); i < numVariables; ++i) {
+                col = (col << 1) | minterm[i];
+            }
+            const rowIndex = rowGrayMap[row];
+            const colIndex = colGrayMap[col];
+            kmap[rowIndex][colIndex] = 1;
+        });
+
+        let rowVars = variables.slice(0, Math.ceil(numVariables / 2)).join('');
+        let colVars = variables.slice(Math.ceil(numVariables / 2)).join('');
+
+        let tableHtml = '<table>';
+        tableHtml += '<tr><th></th>';
+        colGray.forEach(code => {
+            tableHtml += `<th>${code}(${colVars})</th>`;
+        });
+        tableHtml += '</tr>';
+        for (let i = 0; i < rows; i++) {
+            tableHtml += `<tr><td>${rowGray[i]}(${rowVars})</td>`;
+            for (let j = 0; j < cols; j++) {
+                tableHtml += `<td class=\"cell ${kmap[i][j] === 1 ? 'cell-group1' : ''}\">${kmap[i][j] === -1 ? '0' : kmap[i][j]}</td>`;
+            }
+            tableHtml += '</tr>';
+        }
+        tableHtml += '</table>';
+
+        kmapDiv.innerHTML = tableHtml;
+    }
+
+    const minterms = [[0,0,0,0,0],[0,0,0,1,0],[0,0,0,1,1],[0,1,0,0,0],[0,1,0,1,0],[1,0,0,0,0],[1,0,0,0,1],[1,0,0,1,0],[1,0,0,1,1],[1,0,1,0,1],[1,1,0,0,0],[1,1,0,1,0]];
+
+    const numVariables = 5;
+    const variables = ['a','b','c','d','e'];
+    generateKMap(minterms, numVariables, variables);
+    </script>
+</body>
+</html>
+    

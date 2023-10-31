@@ -37,6 +37,14 @@ void printSet(set<int> s) {
     cout << "]";
 }
 
+string fullExpression(vector<string> s) {
+    string exp = "";
+    if (s.empty()) { return "-"; }
+    exp += s.at(0);
+    for (int i = 1; i < s.size(); i++) exp += " + " + s.at(i);
+    return exp;
+}
+
 struct implicationRow {
 
         set<int> coveredMinterms;
@@ -626,36 +634,41 @@ string findMinimumPI(const vector<bool>& minterm, const vector<string>& PIs) {
 }
 
 string solvePITable(vector<string>& EPIs, vector<string>& PIs, vector<vector<bool>>& minterms) {
-    set<string> minimizedExpression;
+    vector<string> minimizedExpression;
     string minimized = "";
 
     // Add all EPIs to the minimized expression
     for (const auto& epi : EPIs) {
-        minimizedExpression.insert(epi);
+        if (epi != "") minimizedExpression.push_back(epi);
     }
 
     // Cover remaining minterms
     for (const auto& minterm : minterms) {
         if (!isCoveredByEPIs(minterm, EPIs)) {
             string minPI = findMinimumPI(minterm, PIs);
-            minimizedExpression.insert(minPI);
+            if (find(minimizedExpression.begin(), minimizedExpression.end(), minPI) == minimizedExpression.end()
+                && minPI != "") {
+                minimizedExpression.push_back(minPI);
+            }
         }
     }
 
     // Print the minimized expression
     std::cout << "Minimized Boolean Expression: ";
-    auto it = minimizedExpression.begin();
-    if (it != minimizedExpression.end()) {
-        cout << *it;
-        minimized += *it;
-        ++it;
-    }
-    for (; it != minimizedExpression.end(); ++it) {
-        cout << " + " << *it;
-        minimized += " + " + *it;
-    }
-    cout << endl;
+    minimized = fullExpression(minimizedExpression);
+    cout << minimized;
     return minimized;
+    // auto it = minimizedExpression.begin();
+    // if (it != minimizedExpression.end()) {
+    //     cout << *it;
+    //     minimized += *it;
+    //     ++it;
+    // }
+    // for (; it != minimizedExpression.end(); ++it) {
+    //     cout << " + " << *it;
+    //     minimized += " + " + *it;
+    // }
+    
 }
 
 //q7
@@ -982,6 +995,9 @@ int main()
     classifyEssentials(primeImplicants, essentialPrimeImplicants,
         nonEssentialPrimeImplicants, essentialExpressions, nonEssentialExpressions, Variables);
 
+    generateWebFiles(minterms, Variables.size(), Variables);
+    generateHTMLFile(solvePITable(essentialExpressions, nonEssentialExpressions, minterms));
+
     // implicationRow x;
     // char nums[] = {'1','0','-'};
     // char vars[] = {'a', 'b', 'c'};
@@ -1003,16 +1019,8 @@ int main()
 
 
 
-
-   // Dummy data for testing (You should replace these data from q3 and q4)
-   vector<string> EPIs = {"AB", "AC","BC"};  // Replace with your actual EPIs
-   vector<string> PIs = {"AB", "AC", "BC"};  // Replace with your actual PIs
-   // Call the function to solve the PI table and print the minimized Boolean expression
-    int numVariables = Variables.size();
-
 //    generateKMap(minterms, numVariables);
-    generateWebFiles(minterms, numVariables, Variables);
-    generateHTMLFile(solvePITable(EPIs, PIs, minterms));
+    
 
     return 0;
 }
