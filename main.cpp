@@ -3,10 +3,8 @@
 #include <vector>
 #include <algorithm>
 #include <cmath>
-#include <string>
 #include <set>
 #include <stdlib.h>
-#include <map>
 #include <bitset>
 using namespace std;
 struct implicationRow {
@@ -673,13 +671,13 @@ int main()
 
 
 
-//    // Dummy data for testing (You should replace these data from q3 and q4)
-//    vector<string> EPIs = {"AB", "AC"};  // Replace with your actual EPIs
-//    vector<string> PIs = {"AB", "AC", "BC"};  // Replace with your actual PIs
-//    minterms = {{1, 0, 1}, {1, 1, 0}};  // Replace with your actual minterms
-//    // Call the function to solve the PI table and print the minimized Boolean expression
-//    solvePITable(EPIs, PIs, minterms);
-    int numVariables = 4;
+   // Dummy data for testing (You should replace these data from q3 and q4)
+    vector<string> EPIs = {"AD", "AC","BC"};  // Replace with your actual EPIs
+    vector<string> PIs = {"AD", "AC", "BC"};  // Replace with your actual PIs
+
+    // Call the function to solve the PI table and print the minimized Boolean expression
+    solvePITable(EPIs, PIs, minterms);
+    int numVariables = Variables.size();
 
     generateKMap(minterms, numVariables);
 
