@@ -968,7 +968,7 @@ void generateHTMLFile(const std::string& waveDromScript) {
 }
 
 
-int main()
+int testProgram(string function)
 {
     // Function returns on invalid expression for testing purposes
     bool flag;
@@ -993,6 +993,7 @@ int main()
         {
             std::cout << "Invalid expression. Try another one!" << endl;
             flag = true;
+            break;
         }
     } while (flag);
 
