@@ -386,78 +386,78 @@ void generateTruthTable(string& function, vector <char>& Variables, vector<vecto
 void generatePrimeImplicants(vector<char>& Variables, vector<vector<bool>>& minterms, set<implicationRow>& primes)
 {
 
-    vector<vector<vector<bool>>> groups;
-    int maxOnes = 0;
+    // vector<vector<vector<bool>>> groups;
+    // int maxOnes = 0;
 
-    for (const auto& minterm : minterms)
-    {
-        int onesCount = count(minterm.begin(), minterm.end(), true);
-        maxOnes = max(maxOnes, onesCount);
-    }
-    groups.resize(maxOnes + 1);
+    // for (const auto& minterm : minterms)
+    // {
+    //     int onesCount = count(minterm.begin(), minterm.end(), true);
+    //     maxOnes = max(maxOnes, onesCount);
+    // }
+    // groups.resize(maxOnes + 1);
 
-    for (const auto& minterm : minterms)
-    {
-        int onesCount = count(minterm.begin(), minterm.end(), true);
-        groups[onesCount].push_back(minterm);
-    }
+    // for (const auto& minterm : minterms)
+    // {
+    //     int onesCount = count(minterm.begin(), minterm.end(), true);
+    //     groups[onesCount].push_back(minterm);
+    // }
 
-    std::cout << "Prime Implicants:" << endl;
+    // std::cout << "Prime Implicants:" << endl;
 
-    set<string> seen;
+    // set<string> seen;
 
-    for (int i = 0; i < groups.size(); ++i)
-    {
-        for (const auto& term1 : groups[i])
-        {
-            for (int j = i + 1; j < groups.size(); ++j)
-            {
-                for (const auto& term2 : groups[j])
-                {
-                    int diffBits = 0;
-                    int diffIndex = -1;
+    // for (int i = 0; i < groups.size(); ++i)
+    // {
+    //     for (const auto& term1 : groups[i])
+    //     {
+    //         for (int j = i + 1; j < groups.size(); ++j)
+    //         {
+    //             for (const auto& term2 : groups[j])
+    //             {
+    //                 int diffBits = 0;
+    //                 int diffIndex = -1;
 
-                    for (int k = 0; k < term1.size(); ++k)
-                    {
-                        if (term1[k] != term2[k])
-                        {
-                            diffBits++;
-                            diffIndex = k;
-                        }
-                    }
+    //                 for (int k = 0; k < term1.size(); ++k)
+    //                 {
+    //                     if (term1[k] != term2[k])
+    //                     {
+    //                         diffBits++;
+    //                         diffIndex = k;
+    //                     }
+    //                 }
 
-                    if (diffBits == 1)
-                    {
-                        string primeImplicant;
-                        for (int k = 0; k < term1.size(); ++k)
-                        {
-                            if (k != diffIndex)
-                            {
-                                if (term1[k] || term2[k])
-                                {
-                                    primeImplicant += Variables[k];
-                                }
-                            }
-                        }
+    //                 if (diffBits == 1)
+    //                 {
+    //                     string primeImplicant;
+    //                     for (int k = 0; k < term1.size(); ++k)
+    //                     {
+    //                         if (k != diffIndex)
+    //                         {
+    //                             if (term1[k] || term2[k])
+    //                             {
+    //                                 primeImplicant += Variables[k];
+    //                             }
+    //                         }
+    //                     }
 
-                        if (seen.find(primeImplicant) == seen.end()) {
-                            std::cout << "PI: " << primeImplicant << " Covers Minterms: ";
-                            for (const auto& m : {term1, term2})
-                            {
-                                for (int k = 0; k < m.size(); ++k)
-                                {
-                                    std::cout << m[k];
-                                }
-                                std::cout << '\t';
-                            }
-                            std::cout << endl;
-                            seen.insert(primeImplicant);
-                        }
-                    }
-                }
-            }
-        }
-    }
+    //                     if (seen.find(primeImplicant) == seen.end()) {
+    //                         std::cout << "PI: " << primeImplicant << " Covers Minterms: ";
+    //                         for (const auto& m : {term1, term2})
+    //                         {
+    //                             for (int k = 0; k < m.size(); ++k)
+    //                             {
+    //                                 std::cout << m[k];
+    //                             }
+    //                             std::cout << '\t';
+    //                         }
+    //                         std::cout << endl;
+    //                         seen.insert(primeImplicant);
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 
     // Use Implication Table and pick minterms with logical distances of 1 (with relatively naive algorithm) to combine
     // 2 maps to continuously push the simplified iteration, and then we scan at the end and add the finals to the PI table
@@ -1003,8 +1003,9 @@ void testProgram(string function)
 
     classifyEssentials(primeImplicants, essentialPrimeImplicants,
         nonEssentialPrimeImplicants, essentialExpressions, nonEssentialExpressions, Variables);
-
-    generateWebFiles(minterms, Variables.size(), Variables);
+    if ((Variables.size() >= 2) && (Variables.size() <= 4)) {
+        generateWebFiles(minterms, Variables.size(), Variables);
+    }
     generateHTMLFile(solvePITable(essentialExpressions, nonEssentialExpressions, minterms));
     
 }
