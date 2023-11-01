@@ -12,6 +12,7 @@
 #include <map>
 #include <iterator>
 #include <algorithm>
+#include <conio.h>
 using namespace std;
 
 void printVec(vector<string> s) {
@@ -962,7 +963,7 @@ void generateHTMLFile(const std::string& waveDromScript) {
 
 void testProgram(string function)
 {
-    // Cin functionality removed and function returns on invalid expression for testing purposes
+    // Function returns on invalid expression for testing purposes
     bool flag;
     vector <char> Variables;
     vector<vector<bool>> minterms;
@@ -999,9 +1000,6 @@ void testProgram(string function)
 
     generateWebFiles(minterms, Variables.size(), Variables);
     generateHTMLFile(solvePITable(essentialExpressions, nonEssentialExpressions, minterms));
-
-
-//    generateKMap(minterms, numVariables);
     
 }
 
@@ -1019,6 +1017,8 @@ int main() {
             "\n\nRUNNING TEST ON EXPRESSION: \"" << s << "\"\n\n"
             << "--------------------------------------------------\n\n\n"; 
         testProgram(s);
+        cout << "\n\nPress any key to continue...\n";
+        getch();
     }
     return 0;
 }
