@@ -64,13 +64,14 @@ struct implicationRow {
             temp.mintermBits.push_back('-');
             for (int i = difBit + 1; i < this->mintermBits.size(); i++) temp.mintermBits.push_back(this->mintermBits.at(i));
             temp.coveredMinterms.insert(other.coveredMinterms.begin(), other.coveredMinterms.end());
-            return temp;            
+            std::cout << endl;
+            return temp;
         }
-        
+
         bool covers(const int& minterm) {
             return (coveredMinterms.find(minterm) != coveredMinterms.end());
         }
-        
+
         string booleanExpression(vector<char> variables) {
             string boolExp = "";
             string temp;
@@ -100,7 +101,7 @@ bool logicallyAdj(vector<char> exp1, vector<char> exp2, int& differentBitIndex) 
         if (*it1 != *it2) {
             // // This vv means you have met more than 1 different actual bit (not "-"), so they are not log. adj.
             // if (incons > 0 || (*it1 == '-' && *it2 != '-') || (*it1 != '-' && *it2 == '-')) {
-            //     differentBitIndex = -1; return 0; 
+            //     differentBitIndex = -1; return 0;
             // }
             incons++;
             differentBitIndex = tempInd;
@@ -240,8 +241,8 @@ void generateTruthTable(string& function, vector <char>& Variables, vector<vecto
     vector<bool> minterm;
     string canonical_PoS = "";
     string canonical_SoP = "";
-    std::cout << "\nTruth Table:" << endl;
-    
+    std::cout << "Truth Table:" << endl;
+
     int numVariables = 0;
     for (char c : function)
 	{
@@ -250,7 +251,7 @@ void generateTruthTable(string& function, vector <char>& Variables, vector<vecto
 			Variables.push_back(c);
         }
     }
-    
+
     sort(Variables.begin(), Variables.end());
 	Variables.erase(unique(Variables.begin(), Variables.end()), Variables.end());
     numVariables = Variables.size();
@@ -271,13 +272,13 @@ void generateTruthTable(string& function, vector <char>& Variables, vector<vecto
     for (int row = 0; row < numRows; row++)
 	{
 	    vector<bool> rowValues;
-	    
+
         for (int var = numVariables - 1; var >= 0; var--)
 		{
             std::cout << ((row >> var) & 1) << " | ";
             rowValues.push_back(((row >> var) & 1));
         }
-        
+
         if (isValidSoP(function))
         {
             result = false;
@@ -334,7 +335,7 @@ void generateTruthTable(string& function, vector <char>& Variables, vector<vecto
                 }
             }
         }
-        
+
         if (result)
         {
             for (int i = 0; i < numVariables; i++)
@@ -371,100 +372,97 @@ void generateTruthTable(string& function, vector <char>& Variables, vector<vecto
             canonical_PoS.pop_back();
             canonical_PoS += ") ";
         }
-        
+
         std::cout << result << endl;
     }
-    
+
     canonical_SoP.pop_back();
     canonical_SoP.pop_back();
     canonical_SoP.pop_back();
-    
-    std::cout << "\nCanonical SoP : " << canonical_SoP << endl << "\nCanonical PoS : " << canonical_PoS << endl;
+
+    std::cout << "canonical SoP : " << canonical_SoP << endl << "canonical PoS : " << canonical_PoS << endl;
 }
 
 void generatePrimeImplicants(vector<char>& Variables, vector<vector<bool>>& minterms, set<implicationRow>& primes)
 {
 
-    /*
-    // DRAFT 1, Scrapped
-    // vector<vector<vector<bool>>> groups;
-    // int maxOnes = 0;
-    
-    // for (const auto& minterm : minterms)
-    // {
-    //     int onesCount = count(minterm.begin(), minterm.end(), true);
-    //     maxOnes = max(maxOnes, onesCount);
-    // }
-    // groups.resize(maxOnes + 1);
+    vector<vector<vector<bool>>> groups;
+    int maxOnes = 0;
 
-    // for (const auto& minterm : minterms)
-    // {
-    //     int onesCount = count(minterm.begin(), minterm.end(), true);
-    //     groups[onesCount].push_back(minterm);
-    // }
+    for (const auto& minterm : minterms)
+    {
+        int onesCount = count(minterm.begin(), minterm.end(), true);
+        maxOnes = max(maxOnes, onesCount);
+    }
+    groups.resize(maxOnes + 1);
 
-    // std::cout << "Prime Implicants:" << endl;
+    for (const auto& minterm : minterms)
+    {
+        int onesCount = count(minterm.begin(), minterm.end(), true);
+        groups[onesCount].push_back(minterm);
+    }
 
-    // set<string> seen;
-    
-    // for (int i = 0; i < groups.size(); ++i)
-    // {
-    //     for (const auto& term1 : groups[i])
-    //     {
-    //         for (int j = i + 1; j < groups.size(); ++j)
-    //         {
-    //             for (const auto& term2 : groups[j])
-    //             {
-    //                 int diffBits = 0;
-    //                 int diffIndex = -1;
+    std::cout << "Prime Implicants:" << endl;
 
-    //                 for (int k = 0; k < term1.size(); ++k)
-    //                 {
-    //                     if (term1[k] != term2[k])
-    //                     {
-    //                         diffBits++;
-    //                         diffIndex = k;
-    //                     }
-    //                 }
-                    
-    //                 if (diffBits == 1)
-    //                 {
-    //                     string primeImplicant;
-    //                     for (int k = 0; k < term1.size(); ++k)
-    //                     {
-    //                         if (k != diffIndex)
-    //                         {
-    //                             if (term1[k] || term2[k])
-    //                             {
-    //                                 primeImplicant += Variables[k];
-    //                             }
-    //                         }
-    //                     }
-                        
-    //                     if (seen.find(primeImplicant) == seen.end()) {
-    //                         std::cout << "PI: " << primeImplicant << " Covers Minterms: ";
-    //                         for (const auto& m : {term1, term2})
-    //                         {
-    //                             for (int k = 0; k < m.size(); ++k)
-    //                             {
-    //                                 std::cout << m[k];
-    //                             }
-    //                             std::cout << '\t';
-    //                         }
-    //                         std::cout << endl;
-    //                         seen.insert(primeImplicant);
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-    */
+    set<string> seen;
+
+    for (int i = 0; i < groups.size(); ++i)
+    {
+        for (const auto& term1 : groups[i])
+        {
+            for (int j = i + 1; j < groups.size(); ++j)
+            {
+                for (const auto& term2 : groups[j])
+                {
+                    int diffBits = 0;
+                    int diffIndex = -1;
+
+                    for (int k = 0; k < term1.size(); ++k)
+                    {
+                        if (term1[k] != term2[k])
+                        {
+                            diffBits++;
+                            diffIndex = k;
+                        }
+                    }
+
+                    if (diffBits == 1)
+                    {
+                        string primeImplicant;
+                        for (int k = 0; k < term1.size(); ++k)
+                        {
+                            if (k != diffIndex)
+                            {
+                                if (term1[k] || term2[k])
+                                {
+                                    primeImplicant += Variables[k];
+                                }
+                            }
+                        }
+
+                        if (seen.find(primeImplicant) == seen.end()) {
+                            std::cout << "PI: " << primeImplicant << " Covers Minterms: ";
+                            for (const auto& m : {term1, term2})
+                            {
+                                for (int k = 0; k < m.size(); ++k)
+                                {
+                                    std::cout << m[k];
+                                }
+                                std::cout << '\t';
+                            }
+                            std::cout << endl;
+                            seen.insert(primeImplicant);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     // Use Implication Table and pick minterms with logical distances of 1 (with relatively naive algorithm) to combine
     // 2 maps to continuously push the simplified iteration, and then we scan at the end and add the finals to the PI table
-    
-    
+
+
 
     set<implicationRow> implicants1, implicants2, primeImplicants;
     implicationRow temp;
@@ -492,7 +490,7 @@ void generatePrimeImplicants(vector<char>& Variables, vector<vector<bool>>& mint
                 if (logicallyAdj((*it1).mintermBits, (*it2).mintermBits, dif)) {
                     indivFinal = false;
                     // Have to store the iterator contents in a variable to call the struct method
-                    implicationRow x = *it1; 
+                    implicationRow x = *it1;
                     implicants2.insert(x.combine(*it2, dif));
                 }
                 it2++;
@@ -502,7 +500,7 @@ void generatePrimeImplicants(vector<char>& Variables, vector<vector<bool>>& mint
             it1++;
         }
         if (implicants2.empty()) flag = 1; // This means no combinations were made
-        else { 
+        else {
             implicants1.clear();
             for (auto it = implicants2.begin(); it != implicants2.end(); it++) implicants1.insert(*it);
             implicants2.clear();
@@ -510,7 +508,7 @@ void generatePrimeImplicants(vector<char>& Variables, vector<vector<bool>>& mint
     }
 
     implicationRow tester;
-    std::cout << "\n\nALL Prime Implicants:\n-----------------\nCovered Minterms\tIn Binary\n----------------------------------\n";
+    std::cout << "ALL Prime Implicants:\n-----------------\nCovered Minterms\tIn Binary\n-----------------\n";
 
     for (auto it = primeImplicants.begin(); it != primeImplicants.end(); it++) {
         tester = *it;
@@ -527,7 +525,7 @@ void classifyEssentials(set<implicationRow> primes, set<implicationRow> essentia
     bool flag; // To mark when another implicant covers a minterm
 
     for (auto it = primes.begin(); it != primes.end(); it++) {
-        
+
         for (auto num = (*it).coveredMinterms.begin(); num != (*it).coveredMinterms.end(); num++) {
             comp = primes.begin();
             flag = false;
@@ -536,7 +534,7 @@ void classifyEssentials(set<implicationRow> primes, set<implicationRow> essentia
                 if (temp.covers(*num) && comp != it) {flag = true; break;} // If we find *another* implicant that covers this minterm
                 comp++;
             }
-            // If we exit the while loop because we got to the end, then no other implicants 
+            // If we exit the while loop because we got to the end, then no other implicants
             // cover this minterm, so it is an essential PI and we don't need to keep checking it
 
             // Otherwise, we keep checking the numbers
@@ -548,7 +546,7 @@ void classifyEssentials(set<implicationRow> primes, set<implicationRow> essentia
                 }
             }
         }
-        
+
     }
     for (auto it = primes.begin(); it != primes.end(); it++) {
         // If we never pushed the implicant on the essentials, then it is not essential.
@@ -564,10 +562,10 @@ void classifyEssentials(set<implicationRow> primes, set<implicationRow> essentia
     std::cout << "\nEssential Prime Implicant Expressions: ";
     printVec(essentialExpressions);
     cout << endl;
-    
+
     std::cout << "\nNon-Essential Prime Implicant Expressions: ";
     printVec(nonEssentialExpressions);
-    cout << endl ;
+    cout << endl;
 
     set<int> uncoveredMinterms;
 
@@ -579,13 +577,13 @@ void classifyEssentials(set<implicationRow> primes, set<implicationRow> essentia
                 if (temp.covers(x)) break;
                 it++;
             }
-            if (it == essentials.end()) uncoveredMinterms.insert(x); // It never met an EPI that covered it 
+            if (it == essentials.end()) uncoveredMinterms.insert(x); // It never met an EPI that covered it
         }
     }
 
     std::cout << "\nMinterms not Covered by Essential Prime Implicants: ";
     printSet(uncoveredMinterms);
-    cout << "\n\n";
+    cout << endl;
 
 }
 
@@ -670,7 +668,7 @@ string solvePITable(vector<string>& EPIs, vector<string>& PIs, vector<vector<boo
     //     cout << " + " << *it;
     //     minimized += " + " + *it;
     // }
-    
+
 }
 
 //q7
@@ -889,7 +887,7 @@ void generateWebFiles(const vector<vector<bool>>& minterms, int numVariables, co
     )";
 
     htmlFile.close();
-    cout << "HTML file has been generated." << "\n\n";
+    cout << "HTML file has been generated." << endl;
 }
 
 string convertToWaveDrom(const string& minimizedFunction) {
@@ -898,7 +896,10 @@ string convertToWaveDrom(const string& minimizedFunction) {
 
     string term;
     string andGroup;
-    for (char c : minimizedFunction) {
+    for (int i = 0; i < minimizedFunction.size(); ++i) {
+        char c = minimizedFunction[i];
+        char next_c = (i < minimizedFunction.size() - 1) ? minimizedFunction[i + 1] : '\0'; // Avoid out-of-bounds access
+
         if (c == '+') {
             if (!andGroup.empty()) {
                 term += "[\"&\", " + andGroup + "]";
@@ -909,9 +910,14 @@ string convertToWaveDrom(const string& minimizedFunction) {
                 term.clear();
             }
         } else if (c == '\'') {
-            andGroup.back() = '~';
+            // Skip this character, as it is already handled by the next_c check below
         } else if (isalpha(c)) {
-            andGroup += string("\"") + c + "\", ";
+            if (next_c == '\'') {
+                andGroup += "[\"~\", \"" + string(1, c) + "\"], ";
+                ++i; // Skip the next character as it is already processed
+            } else {
+                andGroup += string("\"") + c + "\", ";
+            }
         }
     }
     if (!andGroup.empty()) {
@@ -924,6 +930,7 @@ string convertToWaveDrom(const string& minimizedFunction) {
     waveDromScript << "]";
     return waveDromScript.str();
 }
+
 
 void generateHTMLFile(const std::string& waveDromScript) {
     ofstream htmlFile("circuit.html");
@@ -960,16 +967,17 @@ void generateHTMLFile(const std::string& waveDromScript) {
 }
 
 
-void testProgram(string function)
+int main()
 {
-    // Cin functionality removed and function returns on invalid expression for testing purposes
     bool flag;
+    string function;
     vector <char> Variables;
     vector<vector<bool>> minterms;
     do
     {
         flag = false;
-        std::cout << "Enter a Boolean function in SoP or PoS form: " << function << endl;
+        std::cout << "Enter a Boolean function in SoP or PoS form: ";
+        getline(cin, function);
 
         if (isValidSoP(function))
         {
@@ -983,12 +991,11 @@ void testProgram(string function)
         {
             std::cout << "Invalid expression. Try another one!" << endl;
             flag = true;
-            return;
         }
     } while (flag);
 
     generateTruthTable(function, Variables, minterms);
-    
+
     set<implicationRow> primeImplicants, essentialPrimeImplicants, nonEssentialPrimeImplicants;
     vector<string> essentialExpressions, nonEssentialExpressions;
 
@@ -1000,25 +1007,29 @@ void testProgram(string function)
     generateWebFiles(minterms, Variables.size(), Variables);
     generateHTMLFile(solvePITable(essentialExpressions, nonEssentialExpressions, minterms));
 
+    // implicationRow x;
+    // char nums[] = {'1','0','-'};
+    // char vars[] = {'a', 'b', 'c'};
+    // vector<char> varss;
+    // for (char i : vars) varss.push_back(i);
+    // for (char i : nums) x.mintermBits.push_back(i);
+    // cout << x.booleanExpression(varss);
+
+
+    //q4
+
+
+
+
+    //q5
+
+
+
+
+
 
 //    generateKMap(minterms, numVariables);
-    
-}
 
 
-int main() {
-    
-    string trials[] =
-        {"a ++ b", "a + !b + c", "a*b + c", // Invalids
-        "c'd'e' + b'c'd + bc'e' + ab'd'e", "a + b", "ab + cd' + ad", "A'B+AC+ACD", "DC + BD + C'B + AD", // Valids
-        "yw+x'zw", "X'Y'+X'W+X'YZW+XYZW", "z + xy + xz'", "xa + yb + y'xb", "ijk + ik' + jkl'" // Valids
-        };
-
-    for (string s : trials) {
-        cout << "\n\n\n--------------------------------------------------" <<
-            "\n\nRUNNING TEST ON EXPRESSION: \"" << s << "\"\n\n"
-            << "--------------------------------------------------\n\n\n"; 
-        testProgram(s);
-    }
     return 0;
 }
