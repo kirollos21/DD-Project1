@@ -65,7 +65,6 @@ struct implicationRow {
             temp.mintermBits.push_back('-');
             for (int i = difBit + 1; i < this->mintermBits.size(); i++) temp.mintermBits.push_back(this->mintermBits.at(i));
             temp.coveredMinterms.insert(other.coveredMinterms.begin(), other.coveredMinterms.end());
-            std::cout << endl;
             return temp;
         }
 
