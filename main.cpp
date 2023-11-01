@@ -968,18 +968,16 @@ void generateHTMLFile(const std::string& waveDromScript) {
 }
 
 
-int testProgram(string function)
+void testProgram(string function)
 {
     // Function returns on invalid expression for testing purposes
     bool flag;
-    string function;
     vector <char> Variables;
     vector<vector<bool>> minterms;
     do
     {
         flag = false;
-        std::cout << "Enter a Boolean function in SoP or PoS form: ";
-        getline(cin, function);
+        std::cout << "Enter a Boolean function in SoP or PoS form: " << function;
 
         if (isValidSoP(function))
         {
@@ -993,7 +991,7 @@ int testProgram(string function)
         {
             std::cout << "Invalid expression. Try another one!" << endl;
             flag = true;
-            break;
+            return;
         }
     } while (flag);
 
